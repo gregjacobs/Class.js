@@ -15,7 +15,52 @@
  * fact that it is not required to be at the top of any inheritance hierarchy means that you may use it to extend classes from
  * other frameworks and libraries, with all of the features that this implementation provides. 
  * 
- * This project is located at: https://github.com/gregjacobs/Class.js
+ * This project is located at: <a href="https://github.com/gregjacobs/Class.js" target="_blank">https://github.com/gregjacobs/Class.js</a>
+ * 
+ * 
+ * Simple example of creating classes:
+ *     
+ *     var Animal = Class( {
+ *         constructor : function( name ) {
+ *             this.name = name;
+ *         },
+ *         
+ *         sayHi : function() {
+ *             alert( "Hi, my name is: " + this.name );
+ *         },
+ *         
+ *         eat : function() {
+ *             alert( this.name + " is eating" );
+ *         }
+ *     } );
+ *     
+ *     
+ *     var Dog = Animal.extend( {
+ *         // Override sayHi method from superclass
+ *         sayHi : function() {
+ *             alert( "Woof! My name is: " + this.name );
+ *         }
+ *     } );
+ *     
+ *     var Cat = Animal.extend( {
+ *         // Override sayHi method from superclass
+ *         sayHi : function() {
+ *             alert( "Meow! My name is: " + this.name );
+ *         }
+ *     } );
+ *     
+ *     
+ *     var dog1 = new Dog( "Lassie" );
+ *     var dog2 = new Dog( "Bolt" );
+ *     var cat = new Cat( "Leonardo Di Fishy" );
+ *     
+ *     dog1.sayHi();  // "Woof! My name is: Lassie"
+ *     dog2.sayHi();  // "Woof! My name is: Bolt"
+ *     cat.sayHi();   // "Meow! My name is: Leonardo Di Fishy"
+ *     
+ *     dog1.eat();  // "Lassie is eating"
+ *     dog2.eat();  // "Bolt is eating"
+ *     cat.eat();   // "Leonardo Di Fishy is eating"
  */
 /*global window */
 /*jslint forin:true */
@@ -55,9 +100,53 @@ var Class = (function() {
 	
 	/**
 	 * @constructor
+	 * Creates a new class that extends from `Object` (the base class of all classes in JavaScript). Running the
+	 * `Class` constructor function is equivalent of calling {@link #extend Class.extend()}. To extend classes
+	 * that are already subclassed, use either {@link Class#extend}, or the static `extend` method that is added
+	 * to all subclasses.
+	 * 
+	 * Examples for the `Class` constructor:
+	 * 
+	 *     // Create a new class, with Object as the superclass
+	 *     // (i.e. no other particular superclass; see {@link #extend} for that)
+	 *     var MyClass = new Class( {
+	 *         constructor : function() {
+	 *             console.log( "Constructing, 123" );
+	 *         },
+	 *     
+	 *         method1 : function() {},
+	 *         method2 : function() {}
+	 *     } );
+	 *     
+	 *     
+	 *     // Can be used without the `new` keyword as well, if desired.
+	 *     // This may actually make more sense, as you're creating the definition for a class, not an instance.
+	 *     var MyClass = Class( {
+	 *         constructor : function() {
+	 *             console.log( "Constructing, 123" );
+	 *         },
+	 *     
+	 *         method1 : function() {},
+	 *         method2 : function() {}
+	 *     } );
+	 *     
+	 *     
+	 *     // The above two examples are exactly equivalent to:
+	 *     var MyClass = Class.extend( Object, {
+	 *         constructor : function() {
+	 *             console.log( "Constructing, 123" );
+	 *         },
+	 *     
+	 *         method1 : function() {},
+	 *         method2 : function() {}
+	 *     } );
+	 * 
+	 * See {@link #extend} for details about extending classes.
+	 * 
+	 * @param {Object} classDefinition The class definition. See the `overrides` parameter of {@link #extend}.
 	 */
-	var Class = function() {
-		
+	var Class = function( classDefinition ) {
+		return Class.extend( Object, classDefinition );
 	};
 	
 	

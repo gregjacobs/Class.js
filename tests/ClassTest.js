@@ -6,6 +6,48 @@ Ext.test.Session.addSuite( {
 	
 	items : [
 	
+		/**
+		 * Test Class() constructor
+		 */
+		{
+			name : "Test Class() constructor",
+			
+			"The Class() constructor should work as if Class.extend() was called" : function() {
+				var constructorCalled = false,
+				    methodCalled = false;
+				
+				var MyClass = Class( {
+					constructor : function() { constructorCalled = true; },
+					method : function() { methodCalled = true; }
+				} );
+				
+				var instance = new MyClass();
+				Y.Assert.isTrue( constructorCalled, "The constructor should have been called by instantiating the class" );
+				Y.Assert.areSame( MyClass.prototype.method, instance.method, "The method should exist on the prototype" );
+				
+				instance.method();
+				Y.Assert.isTrue( methodCalled, "The method should have been called from the prototype" );
+			},
+			
+			"The Class() constructor should work as if Class.extend() was called, even with using the `new` keyword to extend the class" : function() {
+				var constructorCalled = false,
+				    methodCalled = false;
+				
+				var MyClass = new Class( {
+					constructor : function() { constructorCalled = true; },
+					method : function() { methodCalled = true; }
+				} );
+				
+				var instance = new MyClass();
+				Y.Assert.isTrue( constructorCalled, "The constructor should have been called by instantiating the class" );
+				Y.Assert.areSame( MyClass.prototype.method, instance.method, "The method should exist on the prototype" );
+				
+				instance.method();
+				Y.Assert.isTrue( methodCalled, "The method should have been called from the prototype" );
+			}
+		},
+	
+	
 		/*
 		 * Test apply()
 		 */
@@ -266,7 +308,7 @@ Ext.test.Session.addSuite( {
 					},
 					
 					
-					"The static properties defined in `statics` should not be inherited to subclsases" : function() {
+					"The static properties defined in `statics` should not be inherited to subclasses" : function() {
 						var MyClass = Class.extend( Object, {
 							statics : {
 								staticFn : function() {}
