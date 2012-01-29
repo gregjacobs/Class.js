@@ -85,6 +85,9 @@ var Class = (function() {
 	
 	// Utility functions / variables
 	
+	var version = &quot;0.1.0&quot;;
+	
+	
 <span id='Class-static-method-isObject'>	/**
 </span>	 * Determines if a value is an object.
 	 * 
@@ -166,6 +169,15 @@ var Class = (function() {
 	var Class = function( classDefinition ) {
 		return Class.extend( Object, classDefinition );
 	};
+	
+	
+<span id='Class-static-property-version'>	/**
+</span>	 * @static
+	 * @property {String} version
+	 * 
+	 * Readonly property that gives the version number of Class.js that is being used.
+	 */
+	Class.version = version;
 	
 	
 <span id='Class-static-method-apply'>	/**
