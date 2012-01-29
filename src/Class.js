@@ -100,6 +100,7 @@ var Class = (function() {
 	
 	/**
 	 * @constructor
+	 * 
 	 * Creates a new class that extends from `Object` (the base class of all classes in JavaScript). Running the
 	 * `Class` constructor function is equivalent of calling {@link #extend Class.extend()}. To extend classes
 	 * that are already subclassed, use either {@link Class#extend}, or the static `extend` method that is added

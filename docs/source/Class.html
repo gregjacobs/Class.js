@@ -32,7 +32,7 @@
  * fact that it is not required to be at the top of any inheritance hierarchy means that you may use it to extend classes from
  * other frameworks and libraries, with all of the features that this implementation provides. 
  * 
- * This project is located at: https://github.com/gregjacobs/Class.js
+ * This project is located at: &lt;a href=&quot;https://github.com/gregjacobs/Class.js&quot; target=&quot;_blank&quot;&gt;https://github.com/gregjacobs/Class.js&lt;/a&gt;
  * 
  * 
  * Simple example of creating classes:
@@ -117,6 +117,7 @@ var Class = (function() {
 	
 <span id='Class-method-constructor'><span id='Class'>	/**
 </span></span>	 * @constructor
+	 * 
 	 * Creates a new class that extends from `Object` (the base class of all classes in JavaScript). Running the
 	 * `Class` constructor function is equivalent of calling {@link #extend Class.extend()}. To extend classes
 	 * that are already subclassed, use either {@link Class#extend}, or the static `extend` method that is added
@@ -126,7 +127,7 @@ var Class = (function() {
 	 * 
 	 *     // Create a new class, with Object as the superclass
 	 *     // (i.e. no other particular superclass; see {@link #extend} for that)
-	 *     var MyClass = Class( {
+	 *     var MyClass = new Class( {
 	 *         constructor : function() {
 	 *             console.log( &quot;Constructing, 123&quot; );
 	 *         },
@@ -136,8 +137,9 @@ var Class = (function() {
 	 *     } );
 	 *     
 	 *     
-	 *     // Can be used with the `new` keyword as well, if desired
-	 *     var MyClass = new Class( {
+	 *     // Can be used without the `new` keyword as well, if desired.
+	 *     // This may actually make more sense, as you're creating the definition for a class, not an instance.
+	 *     var MyClass = Class( {
 	 *         constructor : function() {
 	 *             console.log( &quot;Constructing, 123&quot; );
 	 *         },
