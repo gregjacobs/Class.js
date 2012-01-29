@@ -2,6 +2,8 @@
  * Class.js
  * Copyright(c) 2012 Gregory Jacobs.
  * MIT Licensed. http://www.opensource.org/licenses/mit-license.php
+ * 
+ * https://github.com/gregjacobs/Class.js
  */
 /**
  * @class Class
@@ -19,6 +21,8 @@
  * Note that this is not the base class of all `Class` classes. It is a utility to create classes, and extend other classes. The
  * fact that it is not required to be at the top of any inheritance hierarchy means that you may use it to extend classes from
  * other frameworks and libraries, with all of the features that this implementation provides. 
+ * 
+ * This project is located at: https://github.com/gregjacobs/Class.js
  */
 /*global window */
 /*jslint forin:true */
@@ -90,6 +94,7 @@ var Class = (function() {
 	/**
 	 * Copies all the properties of config to obj if they don't already exist.
 	 *
+	 * @static
 	 * @method applyIf
 	 * @param {Object} obj The receiver of the properties
 	 * @param {Object} config The source of the properties
@@ -301,10 +306,11 @@ var Class = (function() {
 	 *         }
 	 *     } );
 	 * 
+	 * @static
+	 * @method override
 	 * @param {Object} origclass The class to override
 	 * @param {Object} overrides The list of functions to add to origClass.  This should be specified as an object literal
 	 * containing one or more methods.
-	 * @method override
 	 */
 	Class.override = function( origclass, overrides ) {
 		if( overrides ){
@@ -324,6 +330,7 @@ var Class = (function() {
 	 * or if the `jsClass` is a mixin on the `obj`. For more information about classes and mixins, see the
 	 * {@link #extend} method.
 	 * 
+	 * @static
 	 * @method isInstanceOf
 	 * @param {Mixed} obj The object (instance) to test.
 	 * @param {Function} jsClass The class (constructor function) of which to see if the `obj` is an instance of, or has a mixin of.

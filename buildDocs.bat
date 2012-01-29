@@ -1,1 +1,0 @@
-vendor\jsduck\jsduck-3.3.1.exe --config=buildDocs.config
