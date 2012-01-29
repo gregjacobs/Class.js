@@ -269,6 +269,20 @@ var Class = (function() {
 			
 			// -----------------------------------
 			
+			// Now apply inherited statics to the class. Inherited statics from the superclass are first applied,
+			// and then all overrides (so that subclasses's inheritableStatics take precedence)
+			if( inheritedStatics || superclass.__Class_inheritedStatics ) {
+				inheritedStatics = Class.apply( {}, inheritedStatics, superclass.__Class_inheritedStatics );  // inheritedStatics takes precedence of the superclass's inherited statics
+				Class.apply( subclass, inheritedStatics );
+				subclass.__Class_inheritedStatics = inheritedStatics;  // store the inheritedStatics for the next subclass
+			}
+			
+			// Now apply statics to the class. These statics should override any inheritableStatics for the current subclass.
+			// However, the inheritableStatics will still affect subclasses of this subclass.
+			if( statics ) {
+				Class.apply( subclass, statics );
+			}
+			
 			
 			// Handle mixins by applying their methods/properties to the subclass prototype. Methods defined by
 			// the class itself will not be overwritten, and the later defined mixins take precedence over earlier

@@ -141,193 +141,347 @@ Ext.test.Session.addSuite( {
 		 */
 		{
 			name: 'Test extend()',
-	
+			ttype: 'suite',
 			
-			"extend() should set up simple prototype-chaining inheritance" : function() {
-				var Dude = Class.extend(Object, {
-					constructor: function(config){
-						Class.apply(this, config);
-						this.isBadass = false;
-					}
-				});
-				var Aweysome = Class.extend(Dude, {
-					constructor: function(){
-						Aweysome.superclass.constructor.apply(this, arguments);
-						this.isBadass = true;
-					}
-				});
-				
-				var david = new Aweysome({
-					davis: 'isAwesome'
-				});
-				Y.Assert.areEqual('isAwesome', david.davis, 'Test if David is awesome');
-				Y.Assert.isTrue(david.isBadass, 'Test if David is badass');
-				Y.Assert.isFunction(david.override, 'Test if extend added the override method');
-				Y.ObjectAssert.areEqual({
-					isBadass: true,
-					davis: 'isAwesome'
-				}, david, 'Test if David is badass and awesome');
-			},
-			
-			
-			"extend() should not require the first argument, defaulting the first arg to Object (which makes the actual superclass `Function`)" : function() {
-				var A = Class.extend( {} );
-				Y.Assert.areSame( A.prototype.superclass.constructor, Function, "The subclass should have had Function as its superclass (which is what happens when the first arg is `Object`)" );
-			},
-			
-			
-			"extend() should add static 'constructor' property to the class (constructor function)" : function() {
-				var A = Class.extend( Object, {} );
-				Y.Assert.areSame( A.constructor, A, "static 'constructor' property not added to constructor function that refers to constructor function" );
-			},
-			
-			
-			
-			"extend() should add static 'constructor' property to a subclass (constructor function)" : function() {
-				var A = Class.extend( Object, {} );
-				var B = Class.extend( A, {} );
-				Y.Assert.areSame( B.constructor, B, "static 'constructor' property not added to constructor function that refers to constructor function" );
-			},
-			
-			
-			
-			"extend() should add static 'superclass' property to a subclass (constructor function) that refers to its superclass prototype" : function() {
-				var A = Class.extend( Object, {} );
-				var B = Class.extend( A, {} );
-				Y.Assert.areSame( B.superclass, A.prototype, "static 'superclass' property not added to constructor function that refers to constructor function" );
-			},
-			
-			
-			// ------------------------------------
-			
-			// Test the this.callSuper() and this.applySuper() functions
-			
-			/* Not yet implemented...
-			
-			"extend() should create this.callSuper() and this.applySuper() methods for subclass constructor functions" : function() {
-				var A = Class.extend( Object, {} );
-				
-				
-			},
-			
-			"extend() should create this.callSuper() and this.applySuper() methods for subclass constructor functions, even if the superclass is not defined using Class.extend()" : function() {
-				var A = function(){};
-				
-			},
-			
-			"extend() should create this.callSuper() and this.applySuper() methods for subclass methods that have a corresponding superclass method" : function() {
-				
-			},
-			
-			"extend() should create this.callSuper() and this.applySuper() methods for subclass methods that have a corresponding superclass method, even if the superclass is not defined using Class.extend()" : function() {
-				
-			},
-			
-			"extend() should NOT create this.callSuper() and this.applySuper() methods for subclass methods that do not have a corresponding superclass method" : function() {
-				
-			},
-			*/
-			
-			// ------------------------------------
-			
-			// Test Mixin Functionality 
-			
-			"extend() should be able to add in a single mixin class into another class" : function() {
-				var mixinFnExecuted = false; 
-				
-				var Mixin = Class.extend( Object, {
-					mixinFn : function() {
-						mixinFnExecuted = true;
-					}
-				} );
-				
-				var MyClass = Class.extend( Object, {
-					mixins : [ Mixin ]
-				} );
-				
-				
-				var instance = new MyClass(); 
-				instance.mixinFn();   // execute the function
-				Y.Assert.isTrue( mixinFnExecuted, "The mixin function was not properly added to MyClass." );
-			},
-			
-			
-			
-			"extend() should not overwrite a class's methods/properties with a mixin's methods/properties" : function() {
-				var data = null; 
-				
-				var Mixin = Class.extend( Object, {
-					testProp : "Mixin defined",
-					testMethod : function() {
-						data = "Mixin defined";
-					}
-				} );
-				
-				var MyClass = Class.extend( Object, {
-					mixins : [ Mixin ],
+			items : [
+				{
+					name : "Test basic extend() functionality (prototype inheritance, constructor reference fixing, superclass reference",
 					
-					testProp : "MyClass defined",
-					testMethod : function() {
-						data = "MyClass defined";
+					"extend() should set up simple prototype-chaining inheritance" : function() {
+						var Dude = Class.extend(Object, {
+							constructor: function(config){
+								Class.apply(this, config);
+								this.isBadass = false;
+							}
+						});
+						var Aweysome = Class.extend(Dude, {
+							constructor: function(){
+								Aweysome.superclass.constructor.apply(this, arguments);
+								this.isBadass = true;
+							}
+						});
+						
+						var david = new Aweysome({
+							davis: 'isAwesome'
+						});
+						Y.Assert.areEqual('isAwesome', david.davis, 'Test if David is awesome');
+						Y.Assert.isTrue(david.isBadass, 'Test if David is badass');
+						Y.Assert.isFunction(david.override, 'Test if extend added the override method');
+						Y.ObjectAssert.areEqual({
+							isBadass: true,
+							davis: 'isAwesome'
+						}, david, 'Test if David is badass and awesome');
+					},
+					
+					
+					"extend() should not require the first argument, defaulting the first arg to Object (which makes the actual superclass `Function`)" : function() {
+						var A = Class.extend( {} );
+						Y.Assert.areSame( A.prototype.superclass.constructor, Function, "The subclass should have had Function as its superclass (which is what happens when the first arg is `Object`)" );
+					},
+					
+					
+					"extend() should add static 'constructor' property to the class (constructor function)" : function() {
+						var A = Class.extend( Object, {} );
+						Y.Assert.areSame( A.constructor, A, "static 'constructor' property not added to constructor function that refers to constructor function" );
+					},
+					
+					
+					"extend() should add static 'constructor' property to a subclass (constructor function)" : function() {
+						var A = Class.extend( Object, {} );
+						var B = Class.extend( A, {} );
+						Y.Assert.areSame( B.constructor, B, "static 'constructor' property not added to constructor function that refers to constructor function" );
+					},
+					
+					
+					"extend() should add static 'superclass' property to a subclass (constructor function) that refers to its superclass prototype" : function() {
+						var A = Class.extend( Object, {} );
+						var B = Class.extend( A, {} );
+						Y.Assert.areSame( B.superclass, A.prototype, "static 'superclass' property not added to constructor function that refers to constructor function" );
+					},
+					
+					
+					"extend() should add a static `extend` method to the subclass, which can be used to extend it" : function() {
+						var MyClass = Class.extend( {
+							method : function() {}
+						} );
+						
+						var MySubClass = MyClass.extend( {} );
+						var instance = new MySubClass();
+						
+						Y.Assert.isFunction( instance.method, "The method should have been inherited to the subclass with the static `extend()` method placed on the superclass constructor" );
 					}
-				} );
+				},
+			
+				
+				/* Not yet implemented...
+				{
+					name : "Test superclass method calling",
+					
+						
+					// Test the this.callSuper() and this.applySuper() functions
+					
+					"extend() should create this.callSuper() and this.applySuper() methods for subclass constructor functions" : function() {
+						var A = Class.extend( Object, {} );
+						
+						
+					},
+					
+					"extend() should create this.callSuper() and this.applySuper() methods for subclass constructor functions, even if the superclass is not defined using Class.extend()" : function() {
+						var A = function(){};
+						
+					},
+					
+					"extend() should create this.callSuper() and this.applySuper() methods for subclass methods that have a corresponding superclass method" : function() {
+						
+					},
+					
+					"extend() should create this.callSuper() and this.applySuper() methods for subclass methods that have a corresponding superclass method, even if the superclass is not defined using Class.extend()" : function() {
+						
+					},
+					
+					"extend() should NOT create this.callSuper() and this.applySuper() methods for subclass methods that do not have a corresponding superclass method" : function() {
+						
+					}
+				}
+				*/
 				
 				
-				var instance = new MyClass(); 
-				Y.Assert.areSame( "MyClass defined", instance.testProp, "The mixin should not overwrite the class's properties" );
 				
-				instance.testMethod();
-				Y.Assert.areSame( "MyClass defined", data, "The mixin's method should not have overwritten the class's method." );
-			},
-			
-			
-			
-			"extend() should have later-defined mixins take precedence over earlier-defined mixins" : function() {
-				var Mixin1 = Class.extend( Object, {
-					testProp : "Mixin1 defined"
-				} );
-				var Mixin2 = Class.extend( Object, {
-					testProp : "Mixin2 defined"
-				} );
+				/*
+				 * Test extend() statics functionality
+				 */
+				{
+					name: 'Test extend() statics functionality',
+					
+					"extend() should add static properties defined in `statics`" : function() {
+						var MyClass = Class.extend( Object, {
+							statics : {
+								staticFn1 : function() {},
+								staticFn2 : function() {}
+							}
+						} );
+						
+						Y.Assert.isFunction( MyClass.staticFn1 );
+						Y.Assert.isFunction( MyClass.staticFn2 );
+					},
+					
+					
+					"The static properties defined in `statics` should not be inherited to subclsases" : function() {
+						var MyClass = Class.extend( Object, {
+							statics : {
+								staticFn : function() {}
+							}
+						} );
+						var MySubClass = MyClass.extend( {} );
+						
+						Y.Assert.isFunction( MyClass.staticFn );
+						Y.Assert.isUndefined( MySubClass.staticFn );
+					}					
+				},
 				
-				var MyClass = Class.extend( Object, {
-					mixins : [ Mixin1, Mixin2 ]
-				} );
 				
-				var instance = new MyClass();
-				Y.Assert.areSame( "Mixin2 defined", instance.testProp, "The second mixin's properties/methods should take precedence over the first one's." );
-			},
-			
-			
-			// --------------------------------
-			
-			// Test setting up the hasMixin() method both as a static method, and an instance method
-			
-			"extend() should have set up the static hasMixin() method, which should check the class for a given mixin" : function() {
-				var Mixin = Class.extend( Object, {} );
-				var SomeOtherMixin = Class.extend( Object, {} );
 				
-				var MyClass = Class.extend( Object, {	
-					mixins : [ Mixin ]
-				} );
+				/*
+				 * Test extend() inheritedStatics functionality
+				 */
+				{
+					name: 'Test extend() inheritedStatics functionality',
+					
+					"extend() should add static properties defined in `inheritedStatics`" : function() {
+						var MyClass = Class.extend( Object, {
+							inheritedStatics : {
+								staticFn1 : function() {},
+								staticFn2 : function() {}
+							}
+						} );
+						
+						Y.Assert.isFunction( MyClass.staticFn1 );
+						Y.Assert.isFunction( MyClass.staticFn2 );
+					},
+					
+					
+					"The static properties defined in `inheritedStatics` should be inherited to subclasses" : function() {
+						var MyClass = Class.extend( Object, {
+							inheritedStatics : {
+								staticFn : function() {}
+							}
+						} );
+						var MySubClass = MyClass.extend( {} );
+						var MySubSubClass = MySubClass.extend( {} );
+						var MySubSubSubClass = MySubSubClass.extend( {} );
+						
+						Y.Assert.isFunction( MyClass.staticFn, "The staticFn should exist on the class it was defined on with `inheritedStatics`" );
+						Y.Assert.isFunction( MySubClass.staticFn, "The staticFn should exist on a direct subclass" );
+						Y.Assert.isFunction( MySubSubClass.staticFn, "The staticFn should exist on a subclass 2 subclasses down from the class that defined it" );
+						Y.Assert.isFunction( MySubSubSubClass.staticFn, "The staticFn should exist on a subclass 3 subclasses down from the class that defined it" );
+					},
+					
+					
+					"The static properties defined in `inheritedStatics` should be inherited to subclasses, but not affect superclasses" : function() {
+						var MyClass = Class.extend( {} );
+						var MySubClass = MyClass.extend( {} );
+						var MySubSubClass = MySubClass.extend( {
+							inheritedStatics : {
+								staticFn : function() {}
+							}
+						} );
+						var MySubSubSubClass = MySubSubClass.extend( {} );
+						
+						Y.Assert.isUndefined( MyClass.staticFn, "The staticFn should not exist on a far superclass that has a subclass with `inheritableStatics`" );
+						Y.Assert.isUndefined( MySubClass.staticFn, "The staticFn should not exist on a direct superclass of a subclass with `inheritableStatics`" );
+						Y.Assert.isFunction( MySubSubClass.staticFn, "The staticFn should exist on the subclass that `inheritableStatics` was defined on" );
+						Y.Assert.isFunction( MySubSubSubClass.staticFn, "The staticFn should exist on a subclass of the class that defined `inheritableStatics`" );
+					},
+					
+					
+					"Redefining an inherited static should take precedence in the subclass over the superclass's static" : function() {
+						var method = function() {},
+						    subclassMethod = function() {};
+						
+						var MyClass = Class.extend( {
+							inheritedStatics : {
+								method : method
+							}
+						} );
+						var MySubClass = MyClass.extend( {
+							inheritedStatics : {
+								method : subclassMethod
+							}
+						} );
+						
+						Y.Assert.areSame( method, MyClass.method, "Initial condition: MyClass should have the original method" );
+						Y.Assert.areSame( subclassMethod, MySubClass.method, "MySubClass should have the new method (overriding the superclass static method)" );
+					},
+					
+					
+					"Overriding an inherited static with a regular (non-inherited) static should only affect the class that the non-inherited static is defined for" : function() {
+						var inheritedMethod = function() {},
+						    overrideStaticMethod = function() {};
+						
+						var MyClass = Class.extend( {
+							inheritedStatics : {
+								method : inheritedMethod
+							}
+						} );
+						var MySubClass = MyClass.extend( {
+							statics : {
+								method : overrideStaticMethod  // Note: A non-inherited static
+							}
+						} );
+						var MySubSubClass = MySubClass.extend( {} );
+						
+						Y.Assert.areSame( inheritedMethod, MyClass.method, "Initial condition: MyClass should have the original inheritedMethod" );
+						Y.Assert.areSame( overrideStaticMethod, MySubClass.method, "MySubClass should have the new `static` method (overriding the superclass static method)" );
+						Y.Assert.areSame( inheritedMethod, MySubSubClass.method, "MySubSubClass should have the original inheritedMethod (the non-inherited `static` method in its superclass should not have affected this behavior)" );
+					}
+				},
 				
-				Y.Assert.isTrue( MyClass.hasMixin( Mixin ), "MyClass should have the mixin 'Mixin'" );
-				Y.Assert.isFalse( MyClass.hasMixin( SomeOtherMixin ), "MyClass should *not* have the mixin 'SomeOtherMixin'" );
-			},
+				
+				/*
+				 * Test extend() mixin functionality
+				 */
+				{
+					name: 'Test extend() mixin functionality',
 			
-			
-			"extend() should have set up the instance hasMixin() method, which should check an instance for a given mixin" : function() {
-				var Mixin = Class.extend( Object, {} );
-				var SomeOtherMixin = Class.extend( Object, {} );
-				
-				var MyClass = Class.extend( Object, {	
-					mixins : [ Mixin ]
-				} );
-				var myInstance = new MyClass();
-				
-				Y.Assert.isTrue( myInstance.hasMixin( Mixin ), "myInstance should have the mixin 'Mixin'" );
-				Y.Assert.isFalse( myInstance.hasMixin( SomeOtherMixin ), "myInstance should *not* have the mixin 'SomeOtherMixin'" );
-			}
+					
+					"extend() should be able to add in a single mixin class into another class" : function() {
+						var mixinFnExecuted = false; 
+						
+						var Mixin = Class.extend( Object, {
+							mixinFn : function() {
+								mixinFnExecuted = true;
+							}
+						} );
+						
+						var MyClass = Class.extend( Object, {
+							mixins : [ Mixin ]
+						} );
+						
+						
+						var instance = new MyClass(); 
+						instance.mixinFn();   // execute the function
+						Y.Assert.isTrue( mixinFnExecuted, "The mixin function was not properly added to MyClass." );
+					},
+					
+					
+					
+					"extend() should not overwrite a class's methods/properties with a mixin's methods/properties" : function() {
+						var data = null; 
+						
+						var Mixin = Class.extend( Object, {
+							testProp : "Mixin defined",
+							testMethod : function() {
+								data = "Mixin defined";
+							}
+						} );
+						
+						var MyClass = Class.extend( Object, {
+							mixins : [ Mixin ],
+							
+							testProp : "MyClass defined",
+							testMethod : function() {
+								data = "MyClass defined";
+							}
+						} );
+						
+						
+						var instance = new MyClass(); 
+						Y.Assert.areSame( "MyClass defined", instance.testProp, "The mixin should not overwrite the class's properties" );
+						
+						instance.testMethod();
+						Y.Assert.areSame( "MyClass defined", data, "The mixin's method should not have overwritten the class's method." );
+					},
+					
+					
+					
+					"extend() should have later-defined mixins take precedence over earlier-defined mixins" : function() {
+						var Mixin1 = Class.extend( Object, {
+							testProp : "Mixin1 defined"
+						} );
+						var Mixin2 = Class.extend( Object, {
+							testProp : "Mixin2 defined"
+						} );
+						
+						var MyClass = Class.extend( Object, {
+							mixins : [ Mixin1, Mixin2 ]
+						} );
+						
+						var instance = new MyClass();
+						Y.Assert.areSame( "Mixin2 defined", instance.testProp, "The second mixin's properties/methods should take precedence over the first one's." );
+					},
+					
+					
+					// --------------------------------
+					
+					// Test setting up the hasMixin() method both as a static method, and an instance method
+					
+					"extend() should have set up the static hasMixin() method, which should check the class for a given mixin" : function() {
+						var Mixin = Class.extend( Object, {} );
+						var SomeOtherMixin = Class.extend( Object, {} );
+						
+						var MyClass = Class.extend( Object, {	
+							mixins : [ Mixin ]
+						} );
+						
+						Y.Assert.isTrue( MyClass.hasMixin( Mixin ), "MyClass should have the mixin 'Mixin'" );
+						Y.Assert.isFalse( MyClass.hasMixin( SomeOtherMixin ), "MyClass should *not* have the mixin 'SomeOtherMixin'" );
+					},
+					
+					
+					"extend() should have set up the instance hasMixin() method, which should check an instance for a given mixin" : function() {
+						var Mixin = Class.extend( Object, {} );
+						var SomeOtherMixin = Class.extend( Object, {} );
+						
+						var MyClass = Class.extend( Object, {	
+							mixins : [ Mixin ]
+						} );
+						var myInstance = new MyClass();
+						
+						Y.Assert.isTrue( myInstance.hasMixin( Mixin ), "myInstance should have the mixin 'Mixin'" );
+						Y.Assert.isFalse( myInstance.hasMixin( SomeOtherMixin ), "myInstance should *not* have the mixin 'SomeOtherMixin'" );
+					}
+				}
+			]
 		},
 		
 		
