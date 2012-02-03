@@ -251,6 +251,35 @@ Ext.test.Session.addSuite( {
 						var instance = new MySubClass();
 						
 						Y.Assert.isFunction( instance.method, "The method should have been inherited to the subclass with the static `extend()` method placed on the superclass constructor" );
+					},
+					
+					
+					
+					// Test a constructor returning an object other than its normal `this` reference
+					
+					"if a constructor returns a different object than its `this` reference, that object should be returned when instantiating the class" : function() {
+						var MyClass = Class.extend( {
+							constructor : function() {
+								return { hi: 1 };  // change the object that is returned from the constructor
+							}
+						} );
+						
+						var instance = new MyClass();
+						Y.Assert.areSame( 1, instance.hi, "The subclass constructor should have returned the overriden return object from its superclass constructor" );
+					},
+					
+					
+					"if no explicit constructor is provided, extend() should set up a constructor which returns the value of its superclass's constructor (in case the constructor changes the object that is created)" : function() {
+						var MyClass = Class.extend( {
+							constructor : function() {
+								return { hi: 1 };  // change the object that is returned from the constructor
+							}
+						} );
+						
+						var MySubClass = MyClass.extend( {} );
+						
+						var instance = new MySubClass();
+						Y.Assert.areSame( 1, instance.hi, "The subclass constructor should have returned the overriden return object from its superclass constructor" );
 					}
 				},
 			

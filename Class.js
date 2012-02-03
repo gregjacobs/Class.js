@@ -334,7 +334,7 @@ var Class = (function() {
 			delete overrides.mixins;
 			
 			
-			var subclass = overrides.constructor !== objectConstructor ? overrides.constructor : function() { superclass.apply( this, arguments ); },
+			var subclass = overrides.constructor !== objectConstructor ? overrides.constructor : ( superclass === Object ? function(){} : function() { return superclass.apply( this, arguments ); } ),
 			    F = function(){},
 			    subclassPrototype,
 			    superclassPrototype = superclass.prototype;
