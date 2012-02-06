@@ -1,5 +1,7 @@
 /*!
  * Class.js
+ * Version 0.1.2
+ * 
  * Copyright(c) 2012 Gregory Jacobs.
  * MIT Licensed. http://www.opensource.org/licenses/mit-license.php
  * 
@@ -27,10 +29,7 @@
  * Note that this is not the base class of all `Class` classes. It is a utility to create classes, and extend other classes. The
  * fact that it is not required to be at the top of any inheritance hierarchy means that you may use it to extend classes from
  * other frameworks and libraries, with all of the features that this implementation provides. 
- * 
- * This project is located at: <a href="https://github.com/gregjacobs/Class.js" target="_blank">https://github.com/gregjacobs/Class.js</a>
- * 
- * 
+ *  
  * Simple example of creating classes:
  *     
  *     var Animal = Class( {
@@ -79,10 +78,7 @@
 /*jslint forin:true */
 var Class = (function() {
 	
-	// Utility functions / variables
-	
-	var version = "0.1.2";
-	
+	// Utility functions / variables	
 	
 	/**
 	 * Determines if a value is an object.
@@ -165,15 +161,6 @@ var Class = (function() {
 	var Class = function( classDefinition ) {
 		return Class.extend( Object, classDefinition );
 	};
-	
-	
-	/**
-	 * @static
-	 * @property {String} version
-	 * 
-	 * Readonly property that gives the version number of Class.js that is being used.
-	 */
-	Class.version = version;
 	
 	
 	/**
