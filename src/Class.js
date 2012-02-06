@@ -10,6 +10,12 @@
  *   another (unlike the `instanceof` operator, which checks if an *instance* is a subclass of a given class).
  * - An `instanceOf()` method, which should be used instead of the JavaScript `instanceof` operator, to determine if the instance 
  *   is an instance of a provided class, superclass, or mixin (the JavaScript `instanceof` operator only covers the first two).
+ * - The ability to add static methods while creating/extending a class, right inside the definition using special properties `statics`
+ *   and `inheritedStatics`. The former only applies properties to the class being created, while the latter applies properties to the
+ *   class being created, and all subclasses which extend it. (Note that the keyword for this had to be `statics`, and not `static`, as 
+ *   `static` is a reserved word in Javascript). 
+ * - A special static method, onClassExtended(), which can be placed in either the `statics` or `inheritedStatics` section, that is
+ *   executed after the class has been extended.
  * 
  * Note that this is not the base class of all `Class` classes. It is a utility to create classes, and extend other classes. The
  * fact that it is not required to be at the top of any inheritance hierarchy means that you may use it to extend classes from
@@ -68,7 +74,7 @@ var Class = (function() {
 	
 	// Utility functions / variables
 	
-	var version = "0.1.1";
+	var version = "0.1.2";
 	
 	
 	/**
@@ -395,6 +401,12 @@ var Class = (function() {
 			
 				// Store which mixin classes the subclass has. This is used in the hasMixin() method
 				subclass.mixins = mixins;
+			}
+			
+			
+			// If there is a static onClassExtended method, call it now with the new subclass as the argument
+			if( typeof subclass.onClassExtended === 'function' ) {
+				subclass.onClassExtended( subclass );
 			}
 			
 			return subclass;

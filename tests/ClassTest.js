@@ -551,6 +551,71 @@ Ext.test.Session.addSuite( {
 						Y.Assert.isTrue( myInstance.hasMixin( Mixin ), "myInstance should have the mixin 'Mixin'" );
 						Y.Assert.isFalse( myInstance.hasMixin( SomeOtherMixin ), "myInstance should *not* have the mixin 'SomeOtherMixin'" );
 					}
+				},
+				
+				/*
+				 * Test extend() onClassExtended functionality
+				 */
+				{
+					name: 'Test extend() onClassExtended',
+					
+					
+					"onClassExtended(), if it exists as a static, should be executed after all other extend functionality has completed" : function() {
+						var onClassExtendedCallCount = 0;
+						
+						var MyMixin = Class( {
+							mixinInstanceMethod : function() {}
+						} );
+						
+						var MyClass = Class( {
+							statics : {
+								onClassExtended : function( newClass ) {
+									onClassExtendedCallCount++;
+									
+									// ASSERTS CONTINUE HERE
+									Y.Assert.isFunction( newClass.someStaticMethod, "someStaticMethod should exist as a static method by this point" );
+									Y.Assert.isFunction( newClass.someInheritedStaticMethod, "someInheritedStaticMethod should exist as a static method by this point" );
+									Y.Assert.isFunction( newClass.prototype.mixinInstanceMethod, "mixinInstanceMethod should exist as an instance method by this point" );
+								},
+								
+								someStaticMethod : function() {}
+							},
+							
+							inheritedStatics : {
+								someInheritedStaticMethod : function() {}
+							},
+							
+							mixins : [ MyMixin ]
+						} );
+						
+						Y.Assert.areSame( 1, onClassExtendedCallCount );  // to make sure the function actually runs
+						// NOTE: Asserts continue inside onClassExtended
+					},
+					
+					
+					"onClassExtended(), if it exists as an inherited static, should be executed for all subclasses" : function() {
+						var onClassExtendedCallCount = 0,
+						    currentClassPassedIn;
+						
+						var MyClass = Class( {
+							inheritedStatics : {
+								onClassExtended : function( newClass ) {
+									onClassExtendedCallCount++;
+									currentClassPassedIn = newClass;
+								}
+							}
+						} );
+						
+						Y.Assert.areSame( 1, onClassExtendedCallCount, "onClassExtended should have been called exactly once at this point" );
+						Y.Assert.areSame( MyClass, currentClassPassedIn, "onClassExtended should have been passed the new class" );
+						
+						
+						// Now create a subclass, without an explicit onClassExtended function. It should be used from the superclass
+						var MySubClass = MyClass.extend( {} );
+						
+						Y.Assert.areSame( 2, onClassExtendedCallCount, "onClassExtended should have been called exactly twice at this point" );
+						Y.Assert.areSame( MySubClass, currentClassPassedIn, "onClassExtended should have been passed the new subclass" );
+					}
 				}
 			]
 		},
