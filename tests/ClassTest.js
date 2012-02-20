@@ -347,7 +347,25 @@ Ext.test.Session.addSuite( {
 						
 						Y.Assert.isFunction( MyClass.staticFn );
 						Y.Assert.isUndefined( MySubClass.staticFn );
-					}					
+					},
+					
+					
+					"The static methods defined in `statics` should have their `this` reference set to their class when executed" : function() {
+						var thisReference;
+						
+						var MyClass = Class( {
+							statics : {
+								staticMethod : function() {
+									thisReference = this;
+								}
+							}
+						} );
+						
+						// Execute the function
+						MyClass.staticMethod();
+						
+						Y.Assert.areSame( MyClass, thisReference );
+					}
 				},
 				
 				
@@ -444,6 +462,31 @@ Ext.test.Session.addSuite( {
 						Y.Assert.areSame( inheritedMethod, MyClass.method, "Initial condition: MyClass should have the original inheritedMethod" );
 						Y.Assert.areSame( overrideStaticMethod, MySubClass.method, "MySubClass should have the new `static` method (overriding the superclass static method)" );
 						Y.Assert.areSame( inheritedMethod, MySubSubClass.method, "MySubSubClass should have the original inheritedMethod (the non-inherited `static` method in its superclass should not have affected this behavior)" );
+					},
+					
+					
+					// ------------------
+					
+					
+					"The static methods defined in `inheritedStatics` should have their `this` reference set to their class when executed" : function() {
+						var thisReference;
+						
+						var MyClass = Class( {
+							inheritedStatics : {
+								staticMethod : function() {
+									thisReference = this;
+								}
+							}
+						} );
+						var MySubClass = MyClass.extend( {} );
+						
+						// Execute the method in the superclass
+						MyClass.staticMethod();
+						Y.Assert.areSame( MyClass, thisReference );
+						
+						// Now execute the method in the subclass
+						MySubClass.staticMethod();
+						Y.Assert.areSame( MySubClass, thisReference );
 					}
 				},
 				
