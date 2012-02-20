@@ -155,7 +155,23 @@ var Class = (function() {
 	
 	
 	/**
-	 * Copies all the properties of `config` to `obj`.
+	 * Alias of using the Class constructor function itself. Ex:
+	 * 
+	 *     var Animal = Class.create( {
+	 *         // class definition here
+	 *     } );
+	 * 
+	 * @static
+	 * @method create
+	 * @param {Object} classDefinition The class definition. See the `overrides` parameter of {@link #extend}.
+	 */
+	Class.create = function( classDefinition ) {
+		return Class.extend( Object, classDefinition );
+	};
+	
+	
+	/**
+	 * Utility to copy all the properties of `config` to `obj`.
 	 *
 	 * @static
 	 * @method apply
@@ -178,7 +194,7 @@ var Class = (function() {
 	
 	
 	/**
-	 * Copies all the properties of config to obj if they don't already exist.
+	 * Utility to copy all the properties of `config` to `obj`, if they don't already exist on `obj`.
 	 *
 	 * @static
 	 * @method applyIf
