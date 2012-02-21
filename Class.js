@@ -1,6 +1,6 @@
 /*!
  * Class.js
- * Version 0.1.2
+ * Version 0.1.3
  * 
  * Copyright(c) 2012 Gregory Jacobs.
  * MIT Licensed. http://www.opensource.org/licenses/mit-license.php
@@ -316,7 +316,8 @@ var Class = (function() {
 	 */
 	Class.extend = (function() {
 		// Set up some private vars that will be used with the extend() method
-		var objectConstructor = Object.prototype.constructor;
+		var objectConstructor = Object.prototype.constructor,
+		    superclassMethodCallRegex = /xyz/.test( function(){var xyz;} ) ? /\b_super\b/ : /.*/;  // a regex to see if the _super() method is called within a function, for JS implementations that allow a function's text to be converted to a string 
 		
 		// inline override function
 		var inlineOverride = function( o ) {
@@ -324,14 +325,23 @@ var Class = (function() {
 				this[ m ] = o[ m ];
 			}
 		};
+			
 	
 		// extend() method itself
-		return function( superclass, overrides ) {
+		return function( superclass, overrides ) {			
 			// The first argument may be omitted, making Object the superclass
 			if( arguments.length === 1 ) {
 				overrides = superclass;
 				superclass = Object;
 			}
+			
+			
+			var subclass, 
+			    F = function(){}, 
+			    subclassPrototype,
+			    superclassPrototype = superclass.prototype,
+			    prop;
+			
 			
 			// Grab any special properties from the overrides
 			var statics = overrides.statics,
@@ -342,11 +352,52 @@ var Class = (function() {
 			delete overrides.inheritedStatics;
 			delete overrides.mixins;
 			
+			// --------------------------
 			
-			var subclass = overrides.constructor !== objectConstructor ? overrides.constructor : ( superclass === Object ? function(){} : function() { return superclass.apply( this, arguments ); } ),
-			    F = function(){},
-			    subclassPrototype,
-			    superclassPrototype = superclass.prototype;
+			// Before creating the new subclass pre-process the methods of the subclass (defined in "overrides") to add the this._super()
+			// method for methods that can call their associated superclass method. This should happen before defining the new subclass,
+			// so that the constructor function can be wrapped as well.
+			
+			// A function which wraps methods of the new subclass that can call their superclass method
+			var createSuperclassCallingMethod = function( fnName, fn ) {
+				return function() {
+					var tmpSuper = this._super,  // store any current _super reference, so we can "pop it off the stack" when the method returns
+					    scope = this;
+					
+					// Add the new _super() method that points to the superclass's method
+					this._super = function( args ) {  // args is an array (or arguments object) of arguments
+						superclassPrototype[ fnName ].apply( scope, args || [] );
+					};
+					
+					// Now call the target method
+					var returnVal = fn.apply( this, arguments );
+					
+					// And finally, restore the old _super reference, as we leave the stack context
+					this._super = tmpSuper;
+					
+					return returnVal;
+				};
+			};
+			
+			for( prop in overrides ) {
+				if( overrides.hasOwnProperty( prop ) &&                     // Make sure the property is on the overrides object itself
+				    typeof overrides[ prop ] === 'function' &&              // Make sure the override property is a function (method)
+				    typeof superclassPrototype[ prop ] === 'function' &&    // Make sure the superclass has the same named function (method)
+				    superclassMethodCallRegex.test( overrides[ prop ] )     // And check to see if the string "_super" exists within the override function
+				) {
+					overrides[ prop ] = createSuperclassCallingMethod( prop, overrides[ prop ] );
+				}
+			}
+			
+			// --------------------------
+			
+			
+			// Now that preprocessing is complete, define the new subclass
+			if( overrides.constructor !== objectConstructor ) {
+				subclass = overrides.constructor;
+			} else {
+				subclass = ( superclass === Object ) ? function(){} : function() { return superclass.apply( this, arguments ); };   // create a "default constructor" that automatically calls the superclass's constructor, unless the superclass is Object (in which case we don't need to, as we already have a new object)
+			}
 			
 			F.prototype = superclassPrototype;
 			subclassPrototype = subclass.prototype = new F();  // set up prototype chain
@@ -369,9 +420,8 @@ var Class = (function() {
 			subclassPrototype.hasMixin = function( mixin ) { return Class.hasMixin( this.constructor, mixin ); };   // inlineOverride function defined above
 			
 			// Finally, add the properties/methods defined in the "overrides" config (which is basically the subclass's 
-			// properties/methods) onto the subclass prototype now
+			// properties/methods) onto the subclass prototype now.
 			Class.override( subclass, overrides );
-			
 			
 			// Expose the constructor property on the class itself (as opposed to only on its prototype, which is normally only
 			// available to instances of the class)
@@ -401,7 +451,7 @@ var Class = (function() {
 			if( mixins ) {
 				for( var i = mixins.length-1; i >= 0; i-- ) {
 					var mixinPrototype = mixins[ i ].prototype;
-					for( var prop in mixinPrototype ) {
+					for( prop in mixinPrototype ) {
 						// Do not overwrite properties that already exist on the prototype
 						if( typeof subclassPrototype[ prop ] === 'undefined' ) {
 							subclassPrototype[ prop ] = mixinPrototype[ prop ];

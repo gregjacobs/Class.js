@@ -284,37 +284,222 @@ Ext.test.Session.addSuite( {
 				},
 			
 				
-				/* Not yet implemented...
 				{
-					name : "Test superclass method calling",
+					name : "Test superclass method calling with _super",
 					
+					
+					// Tests for the constructor
+					
+					"extend() should create the this._super() method for subclass constructor functions" : function() {
+						var superclassConstructorCallCount = 0;
+						    
+						var A = Class.extend( Object, {
+							constructor : function() {
+								superclassConstructorCallCount++;
+							}
+						} );
 						
-					// Test the this.callSuper() and this.applySuper() functions
+						var B = A.extend( {
+							constructor : function() {
+								this._super( arguments );
+							}
+						} );
+						
+						var instance = new B();
+						Y.Assert.areSame( 1, superclassConstructorCallCount, "The superclass's constructor should have been called (exactly once)" );
+					},
 					
-					"extend() should create this.callSuper() and this.applySuper() methods for subclass constructor functions" : function() {
+					
+					"extend() should create the this._super() method for subclass constructor functions, and be able to pass up the arguments" : function() {
+						var superclassConstructorArgs;
+						    
+						var A = Class.extend( Object, {
+							constructor : function( a, b, c ) {
+								superclassConstructorArgs = arguments;
+							}
+						} );
+						
+						var B = A.extend( {
+							constructor : function( a, b, c ) {
+								this._super( arguments );
+							}
+						} );
+						
+						var instance = new B( 1, 2, 3 );
+						Y.Assert.areSame( 3, superclassConstructorArgs.length, "The 3 arguments should have been passed up to the superclass constructor" );
+						Y.Assert.areSame( 1, superclassConstructorArgs[ 0 ], "The first arg should be 1" );
+						Y.Assert.areSame( 2, superclassConstructorArgs[ 1 ], "The second arg should be 2" );
+						Y.Assert.areSame( 3, superclassConstructorArgs[ 2 ], "The third arg should be 3" );
+					},
+					
+					
+					"extend() should create the this._super() method for subclass constructor functions, even if the superclass is not defined using Class.extend()" : function() {
+						var superclassConstructorCallCount = 0;
+						var A = function() {
+							superclassConstructorCallCount++;
+						};
+						
+						var B = Class.extend( A, {
+							constructor : function() {
+								this._super();
+							}
+						} );
+						
+						var instance = new B();
+						Y.Assert.areSame( 1, superclassConstructorCallCount, "The superclass's constructor should have been called (exactly once)" );
+					},
+					
+					
+					"extend() should create the this._super() method for subclass constructor functions, even if the superclass does not explicitly define a constructor" : function() {
+						var superclassConstructorCallCount = 0;
+						
 						var A = Class.extend( Object, {} );
 						
+						var B = A.extend( {
+							constructor : function() {
+								this._super();
+								
+								this.myVar = 0;
+							}
+						} );
 						
+						var instance = new B();
+						// Note: Test should simply not throw an error, but check that B's `myVar` instance variable is set
+						Y.Assert.areSame( 0, instance.myVar, "B's `myVar` instance variable should have been set" );
 					},
 					
-					"extend() should create this.callSuper() and this.applySuper() methods for subclass constructor functions, even if the superclass is not defined using Class.extend()" : function() {
+					
+					// --------------------------
+					
+					// Tests for methods
+					
+					"extend() should create the this._super() method for subclass methods that have a corresponding superclass method" : function() {
+						var myMethodCallCount = 0;
+						
+						var A = Class.extend( Object, {
+							myMethod : function() {
+								myMethodCallCount++;
+							}
+						} );
+						
+						var B = A.extend( {
+							myMethod : function() {
+								this._super();
+							}
+						} );
+						
+						var instance = new B();
+						instance.myMethod();
+						Y.Assert.areSame( 1, myMethodCallCount, "The superclass myMethod() should have been called exactly once" );
+					},
+					
+					
+					"extend() should create the this._super() method for subclass methods that have a corresponding superclass method, and be able to pass up arguments" : function() {
+						var superclassMethodArgs;
+						
+						var A = Class.extend( Object, {
+							myMethod : function() {
+								superclassMethodArgs = arguments;
+							}
+						} );
+						
+						var B = A.extend( {
+							myMethod : function( a, b, c ) {
+								this._super( arguments );
+							}
+						} );
+						
+						
+						var instance = new B();
+						instance.myMethod( 1, 2, 3 );
+						Y.Assert.areSame( 3, superclassMethodArgs.length, "The 3 arguments should have been passed up to the superclass method" );
+						Y.Assert.areSame( 1, superclassMethodArgs[ 0 ], "The first arg should be 1" );
+						Y.Assert.areSame( 2, superclassMethodArgs[ 1 ], "The second arg should be 2" );
+						Y.Assert.areSame( 3, superclassMethodArgs[ 2 ], "The third arg should be 3" );
+					},
+					
+					
+					"extend() should create the this._super() method for subclass methods that have a corresponding superclass method, even if the superclass is not defined using Class.extend()" : function() {
+						var myMethodCallCount = 0;
+						
 						var A = function(){};
+						A.prototype.myMethod = function() {
+							myMethodCallCount++;
+						};
 						
+						var B = Class.extend( A, {
+							myMethod : function() {
+								this._super();
+							}
+						} );
+						
+						var instance = new B();
+						instance.myMethod();
+						Y.Assert.areSame( 1, myMethodCallCount, "The superclass myMethod() should have been called exactly once" );
 					},
 					
-					"extend() should create this.callSuper() and this.applySuper() methods for subclass methods that have a corresponding superclass method" : function() {
+					
+					"extend() should NOT create the this._super() method for subclass methods that do not have a corresponding superclass method" : function() {
+						var myMethodCallCount = 0;
 						
+						var A = Class.extend( Object, {
+							// note: no superclass myMethod
+						} );
+						
+						var B = A.extend( {
+							myMethod : function() {
+								this._super();
+							}
+						} );
+						
+						var instance = new B();
+						
+						try {
+							instance.myMethod();  // this line should cause an error to be thrown
+							Y.Assert.fail( "The test should have errored, with '_super' is not a function" );
+							
+						} catch( ex ) {
+							// Since different browsers throw the error differently, check if the string "_super" is in the error message.
+							// If it's not, there might be a different error message
+							if( !/\b_super\b/.test( ex.message ) ) {
+								Y.Assert.fail( "The test threw an error that didn't have to do with the _super() method. The error message is: " + ex.message );
+							}
+						}
 					},
 					
-					"extend() should create this.callSuper() and this.applySuper() methods for subclass methods that have a corresponding superclass method, even if the superclass is not defined using Class.extend()" : function() {
-						
-					},
 					
-					"extend() should NOT create this.callSuper() and this.applySuper() methods for subclass methods that do not have a corresponding superclass method" : function() {
+					"extend() should NOT create the this._super() method for subclass methods that do not call _super()" : function() {
+						var myMethodCallCount = 0;
 						
+						var A = Class.extend( Object, {
+							// note: no superclass myMethod
+						} );
+						
+						var B = A.extend( {
+							myMethod : function() {
+								// Piece together the "_super" string, to fool the code into thinking that this method
+								// does not call its superclass method. However, in real-world code, this wouldn't (or at least 
+								// shouldn't!) be done, so real-world code will be fine
+								var parentMethod = '_' + 's' + 'u' + 'p' + 'e' + 'r';
+								this[ parentMethod ]();
+							}
+						} );
+						
+						var instance = new B();
+						
+						try {
+							instance.myMethod();  // this line should cause an error to be thrown
+							Y.Assert.fail( "The test should have errored, with '_super' is not a function" );
+							
+						} catch( ex ) {
+							// Since different browsers throw the error differently, check if the string "_super" or "parentMethod" (the var that is used) is in 
+							// the error message. If it's not, there might be a different error message
+							if( !/\b_super\b/.test( ex.message ) && !/\bparentMethod\b/.test( ex.message ) ) {
+								Y.Assert.fail( "The test threw an error that didn't have to do with the _super() method. The error message is: " + ex.message );
+							}
+						}
 					}
-				}
-				*/
+				},
 				
 				
 				

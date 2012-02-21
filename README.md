@@ -40,7 +40,7 @@ var Animal = Class( {
 var Dog = Animal.extend( {
 	constructor : function() {
 		// Call the superclass's constructor first
-		Dog.superclass.constructor.apply( this, arguments );
+		this._super( arguments );
 		
 		alert( "Constructing a dog" );
 	},
@@ -54,7 +54,7 @@ var Dog = Animal.extend( {
 var Cat = Animal.extend( {
 	constructor : function() {
 		// Call superclass's constructor first
-		Cat.superclass.constructor.apply( this, arguments );
+		this._super( arguments );
 		
 		alert( "Constructing a cat" );
 	},
@@ -88,6 +88,54 @@ var MySubClass = Class.extend( SomeOtherFrameworkClass, {
 	// class definition here
 } ); 
 ```
+
+#### Calling superclass methods
+
+Superclass methods can be called easily by using `this._super()`. `this._super()` takes an *array* of arguments to pass to the superclass method. It is done this way because most often, you will simply be passing up the `arguments` object to the superclass method. Ex:
+
+```javascript
+var MyClass = Class( {
+	constructor : function( a, b, c ) {
+		alert( "Constructing MyClass with arguments: " + a + " " + b + " " + c );
+	}
+} );
+
+var MySubClass = MyClass.extend( {
+	constructor : function( a, b, c ) {
+		// Call the superclass's constructor
+		this._super( arguments );
+	}
+} );
+
+
+var instance = new MySubClass( 1, 2, 3 );
+```
+
+However, if you want to call the superclass method with specific arguments, they just simply need to be placed into an array. Ex:
+
+```javascript
+var MyClass = Class( {
+	constructor : function( a, b, c ) {
+		for( var i = 0, len = arguments.length; i < len; i++ ) {
+			alert( "Superclass received arg: " + arguments[ i ] );
+		}
+	}
+} );
+
+var MySubClass = MyClass.extend( {
+	constructor : function( a, b, c, d ) {
+		// The subclass accepts an extra argument, d, which we don't want to pass to the superclass's constructor in this case
+		this._super( [ a, b, c ] );
+		
+		// Handle d
+		alert( "subclass handled d (arg 4) as: " + d );
+	}
+} );
+
+
+var instance = new MySubClass( 1, 2, 3, 4 );
+```
+
 
 
 ## Static Properties/Methods, and Inherited Static Properties/Methods
@@ -284,7 +332,8 @@ var Duck = Class( {
 	
 	constructor : function( name ) {
 		// Don't forget to call the mixin's constructor for proper initialization!
-		Observable.constructor.call( this );
+		// Unfortunately, this has to be done by directly using the mixin class's constructor function, setting the proper context object (this)
+		Observable.call( this );
 		
 		this.name = name;
 	},
@@ -318,7 +367,7 @@ var Duck = Class( {
 	
 	constructor : function( name ) {
 		// Don't forget to call the mixin's constructor!
-		Observable.constructor.call( this );
+		Observable.call( this );
 		
 		this.name = name;
 	},
@@ -331,7 +380,9 @@ var Duck = Class( {
 	fireEvent : function() {
 		alert( "just a note: fireEvent() has been called!" );
 		
-		// Call the method from the mixin now
+		// Call the method from the mixin now.
+		// Instance methods are located on the prototype (as with any prototype chained implementation), and we must
+		// call it in the correct scope (`this`).
 		Observable.prototype.fireEvent.apply( this, arguments );
 	}
 	
@@ -373,6 +424,9 @@ alert( MySubClass.uniqueId );  // alerts: 2
 
 
 ## Changelog:
+
+### 0.1.3
+* Added the ability to call the superclass method simply by using this._super(). 
 
 ### 0.1.2
 
