@@ -81,12 +81,28 @@ cat.eat();   // "Leonardo Di Fishy is eating"
 
 Note that within the class definition, there is a special property which may be defined called `constructor`, which is the actual constructor function for the class. This may be omitted, and a "default constructor" will be used in its place (which is simply an empty function that calls the superclass's constructor).
 
-Because this implementation does not rely on making `Class` the superclass of all classes, Class.js can also be used to extend classes from other frameworks (i.e. constructor functions that rely on prototype-chained inheritance). Ex:
+
+Because this implementation does not rely on making `Class` the superclass of all classes, Class.js can also be used to extend classes from other frameworks (if those classes rely on prototype-chained inheritance behind the scenes, as Class.js does), to be able to add Class.js features (mixins, inherited static properties, etc) to new subclasses of another hierarchy. Ex:
 
 ```javascript
-var MySubClass = Class.extend( SomeOtherFrameworkClass, {
-	// class definition here
-} ); 
+var MySubClass = Class.extend( SomeOtherFrameworksClass, {
+	mixins : [ SomeMixinClass ],
+	
+	inheritedStatics : {
+		someInheritedStaticMethod : function() {}
+	},
+	
+	
+	constructor : function() {
+		// Call our mixin's constructor before calling the superclass's constructor
+		SomeMixinClass.constructor.call( this );
+		
+		MySubClass.superclass.constructor.call( this );
+	}
+	
+	
+	anExtraInstanceMethod : function() {}	
+} );
 ```
 
 #### Calling superclass methods
@@ -179,14 +195,20 @@ var Animal = Class( {
 			// For example purposes, assume some synchronous ajax request is made here for data (although
 			// you should never *really* use a synchronous ajax request; use an asynchronous one instead and
 			// have your users provide a callback function)
-			var data = fakeAjax( '/someUrl/' + animalId );
-			return new this( data.animalName );  // Note: the `this` reference refers to the class / subclass that the method is called from
+			var data = { animalName: "Kitty Kitty Woof Woof" };
+
+			// Note: the `this` reference inside of a static method refers to the class / subclass
+			// that the method is being called from. If called from Cat, `this` refers to Cat. If 
+			// called from Dog, `this` refers to Dog.
+			return new this( data.animalName );
 		}
 		
-	}
+	},
 	
 	
 	// ---------------------
+	
+	// Constructor and instance methods
 	
 	
 	constructor : function( name ) {
@@ -199,7 +221,7 @@ var Animal = Class( {
 } );
 
 
-// Concrete classes (which simply use the definition of the Animal class)
+// Concrete classes (which simply use the definition of the Animal class, and inherit the static 'load' method)
 var Cat = Animal.extend( {} );
 var Dog = Animal.extend( {} );
 
@@ -208,25 +230,29 @@ var Dog = Animal.extend( {} );
 
 
 // Use of the static method that exists only on the Animal class (not subclasses)
-var cat = Animal.createByType( 'cat', "Milo" );   // instantiate a Cat object using the static factory method
-
+var myCat = Animal.createByType( 'cat', "Milo" );   // instantiate a Cat object using the static factory method
+console.log( myCat instanceof Cat );     // true
 
 // Use of static method that is inherited by subclasses
-var cat = Cat.load( 1 );  // load the "first cat" from our "server". Instantiates a Cat object
-var dog = Dog.load( 1 );  // load the "first dog" from our "server". Instantiates a Dog object
+var firstCat = Cat.load( 1 );  // load the "first cat" from our "server". Instantiates a Cat object
+var firstDog = Dog.load( 1 );  // load the "first dog" from our "server". Instantiates a Dog object
+
+console.log( firstCat instanceof Cat );  // true
+console.log( firstDog instanceof Dog );  // true
+
 ```
 
 
 ## Adding Mixins
 
-Although I recommend that you keep multiple inheritance to a minimum (as it increases complexity -- use composition as much as possible instead), there are a few cases where you do want to share some code that wouldn't make sense as part of your normal inheritance hierarchy (to keep yourself DRY). But also, mixins allows you to implement interfaces.
+Although I recommend that you keep multiple inheritance to a minimum (as it increases complexity -- use composition as much as possible instead), there are a few cases where you do want to share some code where that code wouldn't make sense to be a part of your normal inheritance hierarchy (as a base class). But also, mixins allows you to implement interfaces as well.
 
 An example of implementing an interface:
 
 ```javascript
 // The interface
 var List = Class( {
-	add : function() { throw new Error( "add() must be implemented in subclass" ); },
+	add    : function() { throw new Error( "add() must be implemented in subclass" ); },
 	remove : function() { throw new Error( "remove() must be implemented in subclass" ); } 
 } );
 
@@ -248,7 +274,7 @@ var CoolList = Class( {
 
 
 var myList = new CoolList();
-myList.add( "item1" );  // succeeds
+myList.add( "item1" );     // succeeds
 myList.remove( "item1" );  // ERROR: "remove() must be implemented in subclass"
 ```
 
@@ -327,7 +353,9 @@ var Observable = Class( {
 } );
 
 
+// A class that uses the mixin
 var Duck = Class( {
+	
 	mixins : [ Observable ],
 	
 	constructor : function( name ) {
@@ -348,6 +376,7 @@ var Duck = Class( {
 	
 } );
 
+
 var duck = new Duck( "Milo" );
 
 // Observe the duck's quacking
@@ -355,11 +384,11 @@ duck.addListener( 'quack', function( duck ) {
 	alert( "The duck '" + duck.getName() + "' has quacked." );
 } );
 
-duck.quack();
+duck.quack();   // will trigger (fire) the event
 ```
 
 Notice how `Duck` inherited the methods from the mixin. However, if the class that is being created already defines a method that the mixin also defines,
-the **class's method overrides it**. In this case, you must manually call the mixin's method, if you want it to be called (i.e. you wanted to "extend" the mixin's method, not completely *override* it with your new class's definition). Following from the above example:
+the **class's method overrides it**. In this case, you must manually call the mixin's method, if you want it to be called (i.e. you wanted to "extend" the mixin's method, not completely *override* it with your new class's definition). Following from the example from above:
 
 ```javascript
 var Duck = Class( {
@@ -402,25 +431,31 @@ it was originally defined on.
 ```javascript
 var counter = 0;
 
-var MyClass = Class( {
+
+var MyBaseClass = Class( {
 
 	inheritedStatics : {
 		onClassExtended : function( newClass ) {
-			// newClass is the class that was just created. We can't yet reference it as MyClass until the Class() function returns.
-			// It will also apply to subclasses
+			// newClass is the class that was just created. We can't yet reference it as MyClass 
+			// until the Class() function returns. It will also apply to subclasses as well.
 			
-			// Add a static unique id to each class/subclass
-			newClass.uniqueId = ++counter;
+			// Attach a static, unique id to each class/subclass
+			newClass.uniqueId = ++counter;  // `counter` defined above
 		}
 	}
 	
 } );
 
-var MySubClass = MyClass.extend( {} );  // empty class definition, but onClassExtended() still applies to it because it was defined under the `inheritedStatics` section
 
-alert( MyClass.uniqueId );     // alerts: 1
+// empty subclass definition, but onClassExtended() still executes after it is created
+// because it was defined under the `inheritedStatics` section
+var MySubClass = MyBaseClass.extend( {} );  
+
+alert( MyBaseClass.uniqueId ); // alerts: 1
 alert( MySubClass.uniqueId );  // alerts: 2
 ```
+
+
 
 
 ## Changelog:
