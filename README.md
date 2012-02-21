@@ -82,29 +82,6 @@ cat.eat();   // "Leonardo Di Fishy is eating"
 Note that within the class definition, there is a special property which may be defined called `constructor`, which is the actual constructor function for the class. This may be omitted, and a "default constructor" will be used in its place (which is simply an empty function that calls the superclass's constructor).
 
 
-Because this implementation does not rely on making `Class` the superclass of all classes, Class.js can also be used to extend classes from other frameworks (if those classes rely on prototype-chained inheritance behind the scenes, as Class.js does), to be able to add Class.js features (mixins, inherited static properties, etc) to new subclasses of another hierarchy. Ex:
-
-```javascript
-var MySubClass = Class.extend( SomeOtherFrameworksClass, {
-	mixins : [ SomeMixinClass ],
-	
-	inheritedStatics : {
-		someInheritedStaticMethod : function() {}
-	},
-	
-	
-	constructor : function() {
-		// Call our mixin's constructor before calling the superclass's constructor
-		SomeMixinClass.constructor.call( this );
-		
-		MySubClass.superclass.constructor.call( this );
-	}
-	
-	
-	anExtraInstanceMethod : function() {}	
-} );
-```
-
 #### Calling superclass methods
 
 Superclass methods can be called easily by using `this._super()`. `this._super()` takes an *array* of arguments to pass to the superclass method. It is done this way because most often, you will simply be passing up the `arguments` object to the superclass method. Ex:
@@ -127,29 +104,56 @@ var MySubClass = MyClass.extend( {
 var instance = new MySubClass( 1, 2, 3 );
 ```
 
-However, if you want to call the superclass method with specific arguments, they just simply need to be placed into an array. Ex:
+However, if you want to call the superclass method with specific arguments, simply pass them in an array. Ex:
 
 ```javascript
 var MyClass = Class( {
-	constructor : function( a, b, c ) {
+	myMethod : function( a, b, c ) {
 		for( var i = 0, len = arguments.length; i < len; i++ ) {
-			alert( "Superclass received arg: " + arguments[ i ] );
+			alert( "Superclass myMethod received arg: " + arguments[ i ] );
 		}
 	}
 } );
 
 var MySubClass = MyClass.extend( {
-	constructor : function( a, b, c, d ) {
-		// The subclass accepts an extra argument, d, which we don't want to pass to the superclass's constructor in this case
+	myMethod : function( a, b, c, d ) {
+		// The subclass accepts an extra argument, d, which we don't want to pass to the superclass's myMethod in this case
 		this._super( [ a, b, c ] );
 		
 		// Handle d
-		alert( "subclass handled d (arg 4) as: " + d );
+		alert( "subclass myMethod handled d (arg 4) as: " + d );
 	}
 } );
 
 
-var instance = new MySubClass( 1, 2, 3, 4 );
+var instance = new MySubClass();
+instance.myMethod( 1, 2, 3, 4 );
+```
+
+
+#### Using Class.js to extend classes (i.e. prototype chained constructor functions) from other frameworks
+
+Because this implementation does not rely on making `Class` the superclass of all classes, Class.js can also be used to extend classes from other frameworks (if those classes rely on prototype-chained inheritance behind the scenes, as Class.js does), to be able to add Class.js features (mixins, inherited static properties, etc) to new subclasses of another hierarchy. Ex:
+
+```javascript
+var MySubClass = Class.extend( SomeOtherFrameworksClass, {
+	mixins : [ SomeMixinClass ],
+	
+	inheritedStatics : {
+		someInheritedStaticMethod : function() {}
+	},
+	
+	
+	constructor : function() {
+		// Call our mixin's constructor before calling the superclass's constructor
+		SomeMixinClass.call( this );  // Call the constructor function with this object as the context
+		
+		this._super( arguments );
+	}
+	
+	
+	anExtraInstanceMethod : function() {}	
+} );
 ```
 
 
