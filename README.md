@@ -99,7 +99,7 @@ There are two ways to define static methods/properties:
 1. As a static method/property of only the class itself (using `statics`), and 
 2. As a static method/property that is inherited to subclasses as well (using `inheritedStatics`) \*
 
-###### \* Note that properties that are *primitives* (i.e. strings, numbers, and booleans) cannot be simply "inherited" (shared) by subclasses as the same property from the superclass. Because of their nature in JavaScript, these properties are *copied* to subclasses, not shared by them. Keep this in mind when creating static methods that use static properties, to always reference the "shared" static properties from the correct superclass; not a subclass.
+###### \* Note that properties that are *primitives* (i.e. strings, numbers, and booleans) cannot be simply "inherited" (shared) by subclasses as the same property from the superclass. Because of their nature in JavaScript, these properties are *copied* to subclasses, not shared by them. Keep this in mind when creating static methods that use static properties, to always reference the "shared" static properties from the correct superclass (i.e. the superclass that defined them); not a subclass.
 
 Ex:
 
