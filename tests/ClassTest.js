@@ -333,6 +333,18 @@ Ext.test.Session.addSuite( {
 					},
 					
 					
+					"extend() should allow a constructor of a class that is directly inherited from Object to be able to call the superclass constructor" : function() {
+						var A = Class.extend( Object, {
+							constructor : function() {
+								this._super();
+							}
+						} );
+						var instance = new A();
+						
+						// This test should simply not error. this._super() should be defined, and be able to be called just fine
+					},
+					
+					
 					"extend() should create the this._super() method for subclass constructor functions, even if the superclass is not defined using Class.extend()" : function() {
 						var superclassConstructorCallCount = 0;
 						var A = function() {
