@@ -10,8 +10,6 @@ No, really, if you're not using OOP in JavaScript, you're doing it wrong. Grante
 - Add static methods which are automatically inherited by subclasses.
 - Add a special static method (onClassExtended) which allows for the static initialization of the class itself (much like a static initializer does in Java).
 
-So, I'll get right to it!
-
 ###### \* Note: As much as I preferred to simply leave my blanket statement of "you're doing it wrong" without explanation, a friend of mine asked me to elaborate. So what I mean by this is that without OOP, you are most likely not writing reusable, extensible, maintainable, and testable code (yes, you *should* be writing unit tests for your JavaScript, just like you would with any other language). 
 
 
