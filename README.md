@@ -2,7 +2,7 @@
 
 Add some class(es) to your JavaScript! 
 
-No, really, if you're not using OOP in JavaScript, you're doing it wrong\*. Granted, JavaScript doesn't make it easy or straightforward to implement classical inheritance in the language, so that's what this is for! This small utility allows you to:
+No, really, if you're not using OOP in JavaScript, you're doing it wrong. Granted, JavaScript doesn't make it easy or straightforward to implement classical inheritance in the language, so that's what this is for! This small utility allows you to:
 
 - Create classes in JavaScript (where JavaScript doesn't actually have a formal notion of a "class"), easily setting up instance properties / methods.
 - Singly-inherit from other classes (just like in Java, C#, or any other OOP language does).
@@ -10,12 +10,12 @@ No, really, if you're not using OOP in JavaScript, you're doing it wrong\*. Gran
 - Add static methods which are automatically inherited by subclasses.
 - Add a special static method (onClassExtended) which allows for the static initialization of the class itself (much like a static initializer does in Java).
 
-So, I'll get right to it.
+So, I'll get right to it!
 
 ###### \* Note: As much as I preferred to simply leave my blanket statement of "you're doing it wrong" without explanation, a friend of mine asked me to elaborate. So what I mean by this is that without OOP, you are most likely not writing reusable, extensible, maintainable, and testable code (yes, you *should* be writing unit tests for your JavaScript, just like you would with any other language). 
 
 
-## Creating and extending a class
+## Creating and Extending a Class
 
 With the traditional example of animals...
 
@@ -90,7 +90,7 @@ Because this implementation does not rely on making `Class` the superclass of al
 
 
 
-## Static methods, and inherited static methods
+## Static Properties/Methods, and Inherited Static Properties/Methods
 
 Class.js allows you to define static methods within the class definition itself (which makes for easier to read / understand code over some other inheritance implementations, which force you to add static methods only after your subclass has been defined). 
 
@@ -168,7 +168,7 @@ Ex:
 	
 
 
-## Adding mixins
+## Adding Mixins
 
 Although I recommend that you keep multiple inheritance to a minimum (as it increases complexity -- use composition as much as possible instead), there are a few cases where you do want to share some code that wouldn't make sense as part of your normal inheritance hierarchy (to keep yourself DRY). But also, mixins allows you to implement interfaces.
 
