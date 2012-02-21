@@ -106,10 +106,10 @@ Ex:
 ```javascript
 var Animal = Class( {
 	
-	// Note: this had to be `statics` instead of `static`, as `static` is a reserved word in JavaScript
+	// static properties/methods that will be applied to to the Animal class *only* (not subclasses)
 	statics : {
 		
-		// A static factory method for the Animal class *only*. This static method
+		// A static factory method for the Animal class. This static method
 		// will not be inherited into subclasses
 		createByType : function( type, animalName ) {
 			if( type === 'dog' ) {
@@ -129,7 +129,7 @@ var Animal = Class( {
 		// A pretend method that loads a given animal / cat / dog by id from a server
 		load : function( animalId ) {
 			// For example purposes, assume some synchronous ajax request is made here for data (although
-			// you should never really use a synchronous ajax request; use an asynchronous one instead and
+			// you should never *really* use a synchronous ajax request; use an asynchronous one instead and
 			// have your users provide a callback function)
 			var data = fakeAjax( '/someUrl/' + animalId );
 			return new this( data.animalName );  // Note: the `this` reference refers to the class / subclass that the method is called from
