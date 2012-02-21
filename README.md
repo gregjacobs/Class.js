@@ -19,6 +19,7 @@ So, I'll get right to it!
 
 With the traditional example of animals...
 
+```javascript
 	var Animal = Class( {
 		// The class's constructor. The property `constructor` is treated as a special property, which 
 		// is the function that is executed when an instance is created
@@ -78,16 +79,17 @@ With the traditional example of animals...
 	dog1.eat();  // "Lassie is eating"
 	dog2.eat();  // "Bolt is eating"
 	cat.eat();   // "Leonardo Di Fishy is eating"
-
+```
 
 Note that within the class definition, there is a special property which may be defined called `constructor`, which is the actual constructor function for the class. This may be omitted, and a "default constructor" will be used in its place (which is simply an empty function that calls the superclass's constructor).
 
 Because this implementation does not rely on making `Class` the superclass of all classes, Class.js can also be used to extend classes from other frameworks (i.e. constructor functions that rely on prototype-chained inheritance). Ex:
 
+```javascript
 	var MySubClass = Class.extend( SomeOtherFrameworkClass, {
 		// class definition here
 	} ); 
-
+```
 
 
 ## Static Properties/Methods, and Inherited Static Properties/Methods
@@ -103,6 +105,7 @@ There are two ways to define static methods/properties:
 
 Ex:
 
+```javascript
 	var Animal = Class( {
 		
 		// Note: this had to be `statics` instead of `static`, as `static` is a reserved word in JavaScript
@@ -116,7 +119,7 @@ Ex:
 				} else if( type === 'cat' ) {
 					return new Cat( animalName );
 				} else {
-					throw new Error( "Unknown Animal 'type' );				
+					throw new Error( "Unknown Animal type '" + type + "'" );				
 				}
 			}
 		},
@@ -165,7 +168,7 @@ Ex:
 	// Use of static method that is inherited by subclasses
 	var cat = Cat.load( 1 );  // load the "first cat" from our "server". Instantiates a Cat object
 	var dog = Dog.load( 1 );  // load the "first dog" from our "server". Instantiates a Dog object
-	
+```
 
 
 ## Adding Mixins
@@ -174,6 +177,7 @@ Although I recommend that you keep multiple inheritance to a minimum (as it incr
 
 An example of implementing an interface:
 
+```javascript
 	// The interface
 	var List = Class( {
 		add : function() { throw new Error( "add() must be implemented in subclass" ); },
@@ -200,9 +204,12 @@ An example of implementing an interface:
 	var myList = new CoolList();
 	myList.add( "item1" );  // succeeds
 	myList.remove( "item1" );  // ERROR: "remove() must be implemented in subclass"
+```
+
 
 Our interface could have been implemented using a generalized "abstract" function as well:
 
+```javascript
 	var abstractFn = function() { throw new Error( "method must be implemented in subclass" ); }
 
 	// The interface
@@ -210,11 +217,12 @@ Our interface could have been implemented using a generalized "abstract" functio
 		add    : abstractFn,
 		remove : abstractFn 
 	} );
-
+```
 
 
 An example of using a mixin with actual functionality:
 
+```javascript
 	// A mixin that can add very simple events functionality to a class (if anyone wants this for real real, I'll make a github for it)
 	var Observable = Class( {
 		
@@ -301,11 +309,12 @@ An example of using a mixin with actual functionality:
 	} );
 	
 	duck.quack();
-
+```
 
 Notice how `Duck` inherited the methods from the mixin. However, if the class that is being created already defines a method that the mixin also defines,
 the **class's method overrides it**. In this case, you must manually call the mixin's method, if you want it to be called (i.e. you wanted to "extend" the mixin's method, not completely *override* it with your new class's definition). Following from the above example:
 
+```javascript
 	var Duck = Class( {
 		mixins : [ Observable ],
 		
@@ -329,6 +338,7 @@ the **class's method overrides it**. In this case, you must manually call the mi
 		}
 		
 	} );
+```
 
 One last note: if the class includes multiple mixins that all define the same property/method, the mixins defined later in the `mixins` array take precedence (as would happen with multiple inheritance in C++).
 
@@ -340,6 +350,7 @@ This is a special method that may be defined under the `statics` or `inheritedSt
 As a very simple example, we could assign a unique id for each *class* itself (not instances) in an inheritance heirarchy, including the class that
 it was originally defined on.
 
+```javascript
 	var counter = 0;
 	
 	var MyClass = Class( {
@@ -360,7 +371,7 @@ it was originally defined on.
 	
 	alert( MyClass.uniqueId );     // alerts: 1
 	alert( MySubClass.uniqueId );  // alerts: 2
-
+```
 
 
 ## Changelog:
