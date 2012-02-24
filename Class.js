@@ -366,7 +366,7 @@ var Class = (function() {
 					
 					// Add the new _super() method that points to the superclass's method
 					this._super = function( args ) {  // args is an array (or arguments object) of arguments
-						superclassPrototype[ fnName ].apply( scope, args || [] );
+						return superclassPrototype[ fnName ].apply( scope, args || [] );
 					};
 					
 					// Now call the target method

@@ -431,6 +431,25 @@ Ext.test.Session.addSuite( {
 					},
 					
 					
+					"extend() should create the this._super() method, and return the value from the call to this._super()" : function() {
+						var A = Class.extend( Object, {
+							myMethod : function() {
+								return 42;
+							}
+						} );
+						
+						var B = A.extend( {
+							myMethod : function() {
+								return this._super();
+							}
+						} );
+						
+						var instance = new B();
+						var myMethodResult = instance.myMethod();
+						Y.Assert.areSame( 42, myMethodResult, "this._super() should have returned the value returned by the superclass method" );
+					},
+					
+					
 					"extend() should create the this._super() method for subclass methods that have a corresponding superclass method, even if the superclass is not defined using Class.extend()" : function() {
 						var myMethodCallCount = 0;
 						
@@ -473,7 +492,7 @@ Ext.test.Session.addSuite( {
 						} catch( ex ) {
 							// Since different browsers throw the error differently, check if the string "_super" is in the error message.
 							// If it's not, there might be a different error message
-							if( !/\b_super\b/.test( ex.message ) ) {
+							if( !/\b_super\b/.test( ex.message ) && !/'undefined' is not a function/.test( ex.message ) ) {
 								Y.Assert.fail( "The test threw an error that didn't have to do with the _super() method. The error message is: " + ex.message );
 							}
 						}
@@ -506,7 +525,7 @@ Ext.test.Session.addSuite( {
 						} catch( ex ) {
 							// Since different browsers throw the error differently, check if the string "_super" or "parentMethod" (the var that is used) is in 
 							// the error message. If it's not, there might be a different error message
-							if( !/\b_super\b/.test( ex.message ) && !/\bparentMethod\b/.test( ex.message ) ) {
+							if( !/\bparentMethod\b/.test( ex.message ) && !/'undefined' is not a function/.test( ex.message ) ) {
 								Y.Assert.fail( "The test threw an error that didn't have to do with the _super() method. The error message is: " + ex.message );
 							}
 						}
