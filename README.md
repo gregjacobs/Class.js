@@ -1,11 +1,11 @@
-## Class.js
+# Class.js
 
 Add some class(es) to your JavaScript! 
 
 No, really, if you're not using OOP in JavaScript, you're doing it wrong. Granted, JavaScript doesn't make it easy or straightforward to implement classical inheritance in the language, so that's what this is for! This small utility allows you to:
 
 - Create classes in JavaScript (where JavaScript doesn't actually have a formal notion of a "class"), easily setting up instance properties / methods.
-- Singly-inherit from other classes (just like Java, C#, or any other OOP language does), and easily call superclass methods / constructors from overridden methods / constructors in subclasses
+- Singly-inherit from other classes (just like Java, C#, or any other OOP language does), and easily call superclass constructors/methods from overridden constructors/methods in subclasses
 - Add mixin classes as a form of multiple inheritance, or the ability to implement interfaces.
 - Add static methods which are automatically inherited by subclasses.
 - Add a special static method (onClassExtended) which allows for the static initialization of the class itself (much like a static initializer does in Java).
@@ -82,7 +82,7 @@ cat.eat();   // "Leonardo Di Fishy is eating"
 Note that within the class definition, there is a special property which may be defined called `constructor`, which is the actual constructor function for the class. This may be omitted, and a "default constructor" will be used in its place (which is simply an empty function that calls the superclass's constructor).
 
 
-#### Calling superclass methods
+### Calling superclass methods
 
 Superclass methods can be called easily by using `this._super()`. `this._super()` takes an *array* of arguments to pass to the superclass method. It is done this way because most often, you will simply be passing up the `arguments` object to the superclass method. Ex:
 
@@ -131,7 +131,7 @@ instance.myMethod( 1, 2, 3, 4 );
 ```
 
 
-#### Using Class.js to extend classes (i.e. prototype chained constructor functions) from other frameworks
+### Using Class.js to extend classes from other frameworks
 
 Because this implementation does not rely on making `Class` the superclass of all classes, Class.js can also be used to extend classes from other frameworks (if those classes rely on prototype-chained inheritance behind the scenes, as Class.js does), to be able to add Class.js features (mixins, inherited static properties, etc) to new subclasses of another hierarchy. Ex:
 
