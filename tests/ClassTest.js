@@ -525,7 +525,7 @@ Ext.test.Session.addSuite( {
 						} catch( ex ) {
 							// Since different browsers throw the error differently, check if the string "_super" or "parentMethod" (the var that is used) is in 
 							// the error message. If it's not, there might be a different error message
-							if( !/\bparentMethod\b/.test( ex.message ) && !/'undefined' is not a function/.test( ex.message ) ) {
+							if( !/\bparentMethod\b/.test( ex.message ) && !/'undefined' is not a function/.test( ex.message ) && !/\b_super\b/.test( ex.message ) ) {
 								Y.Assert.fail( "The test threw an error that didn't have to do with the _super() method. The error message is: " + ex.message );
 							}
 						}
