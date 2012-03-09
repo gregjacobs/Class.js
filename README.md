@@ -464,7 +464,12 @@ alert( MySubClass.uniqueId );  // alerts: 2
 
 ## Changelog:
 
+### 0.1.3.1
+
+* Implemented workaround for `this._super()` calling method in constructor functions for Internet Explorer. Apparently a property named `constructor` is never enumerable using a for-in loop in IE...
+
 ### 0.1.3
+
 * Added the ability to call the superclass method simply by using this._super(). 
 
 ### 0.1.2

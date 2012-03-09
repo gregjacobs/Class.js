@@ -379,13 +379,28 @@ var Class = (function() {
 				};
 			};
 			
+			
+			// Wrap all methods that use this._super() in the function that will allow this behavior (defined above), except
+			// for the special 'constructor' property, which needs to be handled differently for IE (done below).
 			for( prop in overrides ) {
-				if( overrides.hasOwnProperty( prop ) &&                     // Make sure the property is on the overrides object itself
+				if( prop !== 'constructor' &&                               // We process the constructor separately, below (which is needed for IE, because IE8 and probably all versions below it won't enumerate it in a for-in loop, for whatever reason...)
+					overrides.hasOwnProperty( prop ) &&                     // Make sure the property is on the overrides object itself (not a prototype object)
 				    typeof overrides[ prop ] === 'function' &&              // Make sure the override property is a function (method)
 				    typeof superclassPrototype[ prop ] === 'function' &&    // Make sure the superclass has the same named function (method)
 				    superclassMethodCallRegex.test( overrides[ prop ] )     // And check to see if the string "_super" exists within the override function
 				) {
 					overrides[ prop ] = createSuperclassCallingMethod( prop, overrides[ prop ] );
+				}
+			}
+			
+			// Process the constructor on its own, here, because IE8 (and probably all versions below it) will not enumerate it 
+			// in the for-in loop above (for whatever reason...)
+			if( overrides.constructor ) {
+				if( typeof overrides.constructor === 'function' && 
+				    typeof superclassPrototype.constructor === 'function' && 
+				    superclassMethodCallRegex.test( overrides.constructor )
+				) {
+					overrides.constructor = createSuperclassCallingMethod( 'constructor', overrides.constructor );
 				}
 			}
 			
