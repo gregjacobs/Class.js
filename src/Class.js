@@ -386,7 +386,7 @@ var Class = (function() {
 			
 			// Process the constructor on its own, here, because IE8 (and probably all versions below it) will not enumerate it 
 			// in the for-in loop above (for whatever reason...)
-			if( overrides.constructor ) {
+			if( overrides.hasOwnProperty( 'constructor' ) ) {  // make sure we don't get the constructor property from Object
 				if( typeof overrides.constructor === 'function' && 
 				    typeof superclassPrototype.constructor === 'function' && 
 				    superclassMethodCallRegex.test( overrides.constructor )
