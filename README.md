@@ -158,7 +158,7 @@ var MySubClass = Class.extend( SomeOtherFrameworksClass, {
 
 
 
-## Static Properties/Methods, and Inherited Static Properties/Methods
+## Static and Inherited Static Properties/Methods
 
 Class.js allows you to define static methods within the class definition itself (which makes for easier to read / understand code over some other inheritance implementations, which force you to add static methods only after your subclass has been defined). 
 
