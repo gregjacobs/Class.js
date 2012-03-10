@@ -307,6 +307,10 @@ Ext.test.Session.addSuite( {
 						
 						var instance = new B();
 						Y.Assert.areSame( 1, superclassConstructorCallCount, "The superclass's constructor should have been called (exactly once)" );
+						
+						// As an extra sanity check, make sure the instance is an instance of A and B
+						Y.Assert.isInstanceOf( A, instance, "The instance should be an instance of class A" );
+						Y.Assert.isInstanceOf( B, instance, "The instance should be an instance of class B" );
 					},
 					
 					
