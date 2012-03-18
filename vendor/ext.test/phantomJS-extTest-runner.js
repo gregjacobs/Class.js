@@ -13,7 +13,7 @@
 /*global console, phantom, WebPage, runnerResults, testsFailed */
 /*jslint evil:true */
 function waitFor(testFx, onReady, timeOutMillis) {
-	var maxtimeOutMillis = timeOutMillis ? timeOutMillis : 10001, //< Default Max Timeout is 10s
+	var maxtimeOutMillis = timeOutMillis ? timeOutMillis : 20001, //< Default Max Timeout is 20s
 		start = new Date().getTime(),
 		condition = false,
 		interval = setInterval(function() {
@@ -37,7 +37,7 @@ function waitFor(testFx, onReady, timeOutMillis) {
 
 
 if (phantom.args.length === 0 || phantom.args.length > 2) {
-	console.log('Usage: phantomJS-runner.js URL');
+	console.log('Usage: phantomJS-extTest-runner.js URL');
 	phantom.exit();
 }
 
@@ -66,7 +66,7 @@ page.open(phantom.args[0], function(status){
 			});
 		}, function(){
 			console.log( "Tests finished in " + (new Date().getTime() - startTime) + "ms.");
-			page.evaluate(function(){
+			var numFailed = page.evaluate( function() {
 				// 'runnerResults' and 'testsFailed' variables defined on page
 				
 				console.log( "\nResults:\n--------" );
@@ -76,8 +76,11 @@ page.open(phantom.args[0], function(status){
 					console.log( "\nFailures:\n---------" );
 					console.log( testsFailed.join( "\n\n" ) );
 				}
-			});
-			phantom.exit();
+				
+				return testsFailed.length;
+			} );
+			
+			phantom.exit( ( numFailed > 0 ) ? 1 : 0 );  // return code 1 for failed tests
 		});
 	}
 });
