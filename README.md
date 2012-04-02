@@ -15,6 +15,167 @@ No, really, if you're not using OOP in JavaScript, you're doing it wrong. Grante
 
 ## Creating and Extending a Class
 
+### Creating a Class
+
+A class may be created in one of two ways (both are equivalent):
+
+```javascript
+var Car = Class( {
+	constructor : function() {
+		// constructor logic goes here
+	}
+} );
+```
+
+or
+
+```javascript
+var Car = Class.extend( Object, {
+	constructor : function() {
+		// constructor logic goes here
+	}
+} )
+```
+
+Using the `Class()` function directly literally just calls `Class.extend()` behind the scenes.
+
+Specifying a `constructor` function is optional. If one is not provided, a default constructor that simply calls the superclass's constructor is used instead. The default constructor passes all arguments to the superclass's constructor as well.
+
+
+### Adding Properties / Methods
+
+The object that you provide to `Class()` or `Class.extend()` is the "class definition". Properties specified on this object (with the exception of the special property `constructor`, and a few others which we will see later) are placed on the constructor function's (i.e. class's) prototype. This is where instance methods, and defaults for fields (instance properties) should be placed. Ex:
+
+```javascript
+var Cat = Class( {
+	// An instance property which defaults to an empty string.
+	name : "",
+	
+	
+	// The class's constructor
+	constructor : function( name ) {
+		if( name ) {   // if a name was provided to the constructor, set it
+			this.setName( name );
+		}
+	},
+	
+	
+	// Mutator to set the `name` property
+	setName : function( name ) {
+		this.name = name;
+	},
+	
+	// Accessor to retrieve the `name` property
+	getName : function() {
+		return this.name;
+	}
+	
+} );
+``` 
+
+
+### Extending classes
+
+Classes can be extended (i.e. inherit from) from other classes. This can be done in one of two ways (which are equivalent).
+
+1) Using `Class.extend()`
+
+```javascript
+var Animal = Class( {
+	sayHi : function() {
+		alert( "Hi from Animal" );
+	}
+} );
+
+var Cat = Class.extend( Animal, {
+	meow : function() {
+		alert( "Meow from Cat" );
+	}
+} );
+
+var cat = new Cat();
+cat.sayHi();  // "Hi from Animal"
+cat.meow();   // "Meow from Cat"
+```
+
+2) Using the static `extend` method which is placed on all classes created using `Class()` or `Class.extend()`
+
+```javascript
+var Animal = Class( {
+	sayHi : function() {
+		alert( "Hi from Animal" );
+	}
+} );
+
+var Cat = Animal.extend( {
+	meow : function() {
+		alert( "Meow from Cat" );
+	}
+} );
+
+var cat = new Cat();
+cat.sayHi();  // "Hi from Animal"
+cat.meow();   // "Meow from Cat"
+```
+
+
+### Calling Superclass Methods
+
+Superclass methods can be called easily by using `this._super()`. `this._super()` takes an *array* of arguments to pass to the superclass method. It is done this way because most often, you will simply be passing up the `arguments` object to the superclass method. Ex:
+
+```javascript
+var BaseClass = Class( {
+	constructor : function( a, b, c ) {
+		alert( "Constructing BaseClass with arguments: " + a + " " + b + " " + c );
+	}
+} );
+
+var SubClass = BaseClass.extend( {
+	constructor : function( a, b, c ) {
+		// Call the superclass's constructor, passing up all of the arguments
+		this._super( arguments );
+		
+		// Just another alert to show that the subclass is being constructed as well
+		alert( "Constructing SubClass" );
+	}
+} );
+
+
+var instance = new SubClass( 1, 2, 3 );
+```
+
+
+However, if you want to call the superclass method with specific arguments, simply pass them in an array. Ex:
+
+```javascript
+var BaseClass = Class( {
+	myMethod : function( a, b, c ) {
+		for( var i = 0, len = arguments.length; i < len; i++ ) {
+			alert( "BaseClass myMethod received arg: " + arguments[ i ] );
+		}
+	}
+} );
+
+var SubClass = BaseClass.extend( {
+	myMethod : function( a, b, c, d ) {
+		// The subclass accepts an extra argument, d, which we don't want to pass to the superclass's myMethod in this case
+		this._super( [ a, b, c ] );
+		
+		// Handle argument `d`
+		alert( "SubClass myMethod handled d (arg #4) as: " + d );
+	}
+} );
+
+
+var instance = new SubClass();
+instance.myMethod( 1, 2, 3, 4 );
+```
+
+As you can see from the examples above, `this._super()` works both in the constructor, and all instance methods.
+
+
+### Putting it all together
+
 With the traditional example of animals...
 
 ```javascript
@@ -79,61 +240,11 @@ dog2.eat();  // "Bolt is eating"
 cat.eat();   // "Leonardo Di Fishy is eating"
 ```
 
-Note that within the class definition, there is a special property which may be defined called `constructor`, which is the actual constructor function for the class. This may be omitted, and a "default constructor" will be used in its place (which is simply an empty function that calls the superclass's constructor).
-
-
-### Calling superclass methods
-
-Superclass methods can be called easily by using `this._super()`. `this._super()` takes an *array* of arguments to pass to the superclass method. It is done this way because most often, you will simply be passing up the `arguments` object to the superclass method. Ex:
-
-```javascript
-var MyClass = Class( {
-	constructor : function( a, b, c ) {
-		alert( "Constructing MyClass with arguments: " + a + " " + b + " " + c );
-	}
-} );
-
-var MySubClass = MyClass.extend( {
-	constructor : function( a, b, c ) {
-		// Call the superclass's constructor
-		this._super( arguments );
-	}
-} );
-
-
-var instance = new MySubClass( 1, 2, 3 );
-```
-
-However, if you want to call the superclass method with specific arguments, simply pass them in an array. Ex:
-
-```javascript
-var MyClass = Class( {
-	myMethod : function( a, b, c ) {
-		for( var i = 0, len = arguments.length; i < len; i++ ) {
-			alert( "Superclass myMethod received arg: " + arguments[ i ] );
-		}
-	}
-} );
-
-var MySubClass = MyClass.extend( {
-	myMethod : function( a, b, c, d ) {
-		// The subclass accepts an extra argument, d, which we don't want to pass to the superclass's myMethod in this case
-		this._super( [ a, b, c ] );
-		
-		// Handle d
-		alert( "subclass myMethod handled d (arg 4) as: " + d );
-	}
-} );
-
-
-var instance = new MySubClass();
-instance.myMethod( 1, 2, 3, 4 );
-```
 
 
 ### Using Class.js to extend classes from other frameworks
 
-Because this implementation does not rely on making `Class` the superclass of all classes, Class.js can also be used to extend classes from other frameworks (if those classes rely on prototype-chained inheritance behind the scenes, as Class.js does), to be able to add Class.js features (mixins, inherited static properties, etc) to new subclasses of another hierarchy. Ex:
+Because this implementation does not rely on making `Class` the superclass of all classes, Class.js can also be used to extend classes from other frameworks using `Class.extend()` (if those classes rely on prototype-chained inheritance behind the scenes, as Class.js does), to be able to add Class.js features (mixins, inherited static properties, etc) to new subclasses of another hierarchy. Ex:
 
 ```javascript
 var MySubClass = Class.extend( SomeOtherFrameworksClass, {
@@ -153,6 +264,23 @@ var MySubClass = Class.extend( SomeOtherFrameworksClass, {
 	
 	
 	anExtraInstanceMethod : function() {}	
+} );
+```
+
+For those of you familiar with [Backbone.js](http://documentcloud.github.com/backbone/), instead of using the usual method of extending a class like Backbone.Model (which is to use `Backbone.Model.extend()`), you could use `Class.extend()` to add the features of Class.js to extend it instead. The following example shows how to do so to gain access to `this._super()`:
+
+```javascript
+var MyModel = Class.extend( Backbone.Model, {
+	
+	// Override the set() method to do some pre-processing
+	set : function( attrs ) {
+		// Do some preprocessing of some sort here... but just log for this example
+		console.log( attrs );
+		
+		// Then call the superclass method
+		return this._super( arguments );
+	}
+	
 } );
 ```
 
@@ -423,6 +551,7 @@ var Duck = Class( {
 ```
 
 One last note: if the class includes multiple mixins that all define the same property/method, the mixins defined later in the `mixins` array take precedence (as would happen with multiple inheritance in C++).
+
 
 
 ## onClassExtended
