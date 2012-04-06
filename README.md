@@ -412,15 +412,13 @@ myList.remove( "item1" );  // ERROR: "remove() must be implemented in subclass"
 ```
 
 
-Our interface could have been implemented using a generalized "abstract" function as well:
+Our interface could have been implemented using the generalized "abstractMethod" convenience function provided with Class.js as well:
 
 ```javascript
-var abstractFn = function() { throw new Error( "method must be implemented in subclass" ); }
-
 // The interface
 var List = Class( {
-	add    : abstractFn,
-	remove : abstractFn 
+	add    : Class.abstractMethod,
+	remove : Class.abstractMethod
 } );
 ```
 
@@ -556,7 +554,11 @@ One last note: if the class includes multiple mixins that all define the same pr
 
 ## Abstract Classes
 
-A class may be specified with the special property `abstractClass` on its prototype, to prevent direct instantiation of the class. (Unfortunately it couldn't simply be the word `abstract`, as `abstract` is a reserved word in JavaScript for possible future use). For example:
+A class may be specified with the special property `abstractClass` on its prototype, to prevent direct instantiation of the class. This enforces that a concrete subclass must be created to implement the abstract class's interface. 
+
+(Note: Unfortunately, I had to use a property name other than simply the word `abstract`, as `abstract` is a reserved word in JavaScript). 
+
+For example:
 
 ```javascript
 
@@ -569,9 +571,8 @@ var Vehicle = Class( {
 		this.model = model;
 	},
 	
-	// An abstract method -- must be implemented in subclass
+	// *** An abstract method -- must be implemented in subclass
 	getMaxSpeed : Class.abstractMethod
-	
 } );
 
 
@@ -618,7 +619,7 @@ var MyBaseClass = Class( {
 			// newClass is the class that was just created. We can't yet reference it as MyClass 
 			// until the Class() function returns. It will also apply to subclasses as well.
 			
-			// Attach a static, unique id to each class/subclass
+			// Attach a static, unique id to this class, and each subclass extended from this one
 			newClass.uniqueId = ++counter;  // `counter` defined above
 		}
 	}
