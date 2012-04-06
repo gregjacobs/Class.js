@@ -189,49 +189,37 @@ Ext.test.Session.addSuite( {
 				{
 					name : "Test basic extend() functionality (prototype inheritance, constructor reference fixing, superclass reference",
 					
-					"extend() should set up simple prototype-chaining inheritance" : function() {
-						var Dude = Class.extend(Object, {
-							constructor: function(config){
-								Class.apply(this, config);
-								this.isBadass = false;
-							}
-						});
-						var Aweysome = Class.extend(Dude, {
-							constructor: function(){
-								Aweysome.superclass.constructor.apply(this, arguments);
-								this.isBadass = true;
+					"extend() should set up prototype-chained inheritance" : function() {
+						var Animal = Class.extend( Object, {
+							constructor: function( name ) {
+								this._name = name;
+							},
+							
+							getName : function() {
+								return this._name;
 							}
 						});
 						
-						var david = new Aweysome({
-							davis: 'isAwesome'
+						var Cat = Class.extend( Animal, {
+							constructor: function() {
+								this._super( arguments );
+								this._willMeow = true;
+							},
+							
+							willMeow : function() {
+								return this._willMeow;
+							}
 						});
-						Y.Assert.areEqual('isAwesome', david.davis, 'Test if David is awesome');
-						Y.Assert.isTrue(david.isBadass, 'Test if David is badass');
-						Y.Assert.isFunction(david.override, 'Test if extend added the override method');
-						Y.ObjectAssert.areEqual({
-							isBadass: true,
-							davis: 'isAwesome'
-						}, david, 'Test if David is badass and awesome');
+						
+						var kitty = new Cat( 'Trevor' );
+						Y.Assert.areEqual( 'Trevor', kitty.getName(), "The kitty has the wrong name!" );
+						Y.Assert.isTrue( kitty.willMeow(), "The kitty won't meow!" );
 					},
 					
 					
 					"extend() should not require the first argument, defaulting the first arg to Object (which makes the actual superclass `Function`)" : function() {
 						var A = Class.extend( {} );
 						Y.Assert.areSame( A.prototype.superclass.constructor, Function, "The subclass should have had Function as its superclass (which is what happens when the first arg is `Object`)" );
-					},
-					
-					
-					"extend() should add static 'constructor' property to the class (constructor function)" : function() {
-						var A = Class.extend( Object, {} );
-						Y.Assert.areSame( A.constructor, A, "static 'constructor' property not added to constructor function that refers to constructor function" );
-					},
-					
-					
-					"extend() should add static 'constructor' property to a subclass (constructor function)" : function() {
-						var A = Class.extend( Object, {} );
-						var B = Class.extend( A, {} );
-						Y.Assert.areSame( B.constructor, B, "static 'constructor' property not added to constructor function that refers to constructor function" );
 					},
 					
 					
@@ -254,6 +242,34 @@ Ext.test.Session.addSuite( {
 					},
 					
 					
+					// -----------------------------------
+					
+					// Test the constructor property on instances
+					
+					"extend() should fix the constructor property on the prototype to point back to its actual constructor, when no user-defined constructor is declared" : function() {
+						var MyClass = Class( {} );
+						var MySubClass = MyClass.extend( {} );
+						
+						var myClassInstance = new MyClass();
+						var mySubClassInstance = new MySubClass();
+						
+						Y.Assert.areSame( MyClass, myClassInstance.constructor, "The base class should have its constructor prototype property set to its constructor" );
+						Y.Assert.areSame( MySubClass, mySubClassInstance.constructor, "The subclass should have its constructor prototype property set to its constructor" );
+					},
+					
+					"extend() should fix the constructor property on the prototype to point back to its actual constructor, when a user-defined constructor is declared" : function() {
+						var MyClass = Class( { constructor: function(){} } );
+						var MySubClass = MyClass.extend( { constructor: function(){} } );
+						
+						var myClassInstance = new MyClass();
+						var mySubClassInstance = new MySubClass();
+						
+						Y.Assert.areSame( MyClass, myClassInstance.constructor, "The base class should have its constructor prototype property set to its constructor" );
+						Y.Assert.areSame( MySubClass, mySubClassInstance.constructor, "The subclass should have its constructor prototype property set to its constructor" );
+					},
+					
+					
+					// -----------------------------------
 					
 					// Test a constructor returning an object other than its normal `this` reference
 					
@@ -822,6 +838,99 @@ Ext.test.Session.addSuite( {
 						Y.Assert.isFalse( myInstance.hasMixin( SomeOtherMixin ), "myInstance should *not* have the mixin 'SomeOtherMixin'" );
 					}
 				},
+				
+				
+				/*
+				 * Test extend() 'abstractClass' functionality
+				 */
+				{
+					name: "Test extend() 'abstractClass' functionality",
+					
+					_should : {
+						error : {
+							"A class created with `abstractClass: true` should not be able to be instantiated when declared with no constructor" : 
+								"Error: Cannot instantiate abstract class",
+							"A class created with `abstractClass: true` should not be able to be instantiated when declared with its own constructor" :
+								"Error: Cannot instantiate abstract class"
+						}
+					},
+					
+					
+					"A class created with `abstractClass: true` should not be able to be instantiated when declared with no constructor" : function() {
+						var AbstractClass = Class( {
+							abstractClass: true
+						} );
+						
+						var instance = new AbstractClass();
+						Y.Assert.fail( "The test should have thrown an error when attempting to instantiate an abstract class" );
+					},
+					
+					"A class created with `abstractClass: true` should not be able to be instantiated when declared with its own constructor" : function() {
+						var AbstractClass = Class( {
+							abstractClass: true,
+							
+							// Declare own constructor
+							constructor : function() {}
+						} );
+						
+						var instance = new AbstractClass();
+						Y.Assert.fail( "The test should have thrown an error when attempting to instantiate an abstract class" );
+					},
+					
+					
+					"A subclass of an abstract class (which doesn't define its own constructor) should be able to be instantiated" : function() {
+						var AbstractClass = Class( {
+							abstractClass: true
+						} );
+						var ConcreteClass = AbstractClass.extend( {
+							
+						} );
+						
+						var instance = new ConcreteClass();
+					},
+					
+					
+					"A subclass of an abstract class (which *does* define its own constructor) should be able to be instantiated" : function() {
+						var abstractClassConstructorCallCount = 0;
+						
+						var AbstractClass = Class( {
+							abstractClass: true,
+							
+							constructor : function() {
+								abstractClassConstructorCallCount++;
+							}
+						} );
+						var ConcreteClass = AbstractClass.extend( {
+							
+						} );
+						
+						var instance = new ConcreteClass();
+						Y.Assert.areSame( 1, abstractClassConstructorCallCount, "The abstract class's constructor should have been called exactly once" );
+					},
+					
+					
+					"An abstract class's constructor should be able to be executed from the concrete class" : function() {
+						var abstractClassConstructorCallCount = 0;
+						
+						var AbstractClass = Class( {
+							abstractClass : true,
+							
+							constructor : function() {
+								abstractClassConstructorCallCount++;
+							}
+						} );
+						
+						var ConcreteClass = AbstractClass.extend( {
+							constructor : function() {
+								this._super( arguments );
+							}
+						} );
+						
+						var instance = new ConcreteClass();
+						Y.Assert.areSame( 1, abstractClassConstructorCallCount, "The abstract class's constructor should have been called exactly once" );
+					}
+				},
+				
 				
 				/*
 				 * Test extend() onClassExtended functionality

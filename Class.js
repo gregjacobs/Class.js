@@ -1,6 +1,6 @@
 /*!
  * Class.js
- * Version 0.1.3.1
+ * Version 0.2
  * 
  * Copyright(c) 2012 Gregory Jacobs.
  * MIT Licensed. http://www.opensource.org/licenses/mit-license.php
@@ -221,7 +221,21 @@ var Class = (function() {
 		}
 		return o;
 	};
-		
+	
+	
+	/**
+	 * A function which can be referenced from class definition code to specify an abstract method.
+	 * This method (function) simply throws an error if called, meaning that the method must be overridden in a
+	 * subclass. Ex:
+	 * 
+	 *     var AbstractClass = Class( {
+	 *         myMethod : Class.abstractMethod
+	 *     } );
+	 */
+	Class.abstractMethod = function() {
+		throw new Error( "method must be implemented in subclass" );
+	};
+	
 		
 	/**
 	 * Extends one class to create a subclass of it based on a passed object literal (`overrides`), and optionally any mixin 
@@ -307,17 +321,17 @@ var Class = (function() {
 	 * @method extend
 	 * @param {Function} superclass The constructor function of the class being extended. If making a brand new class with no superclass, this may
 	 *   either be omitted, or provided as `Object`.
-	 * @param {Object} overrides <p>An object literal with members that make up the subclass's properties/method. These are copied into the subclass's
-	 *   prototype, and are therefore shared between all instances of the new class.</p> <p>This may contain a special member named
-	 *   `<b>constructor</b>`, which is used to define the constructor function of the new subclass. If this property is <i>not</i> specified,
-	 *   a constructor function is generated and returned which just calls the superclass's constructor, passing on its parameters.</p>
-	 *   <p><b>It is essential that you call the superclass constructor in any provided constructor. See example code.</b></p>
+	 * @param {Object} overrides An object literal with members that make up the subclass's properties/method. These are copied into the subclass's
+	 *   prototype, and are therefore shared between all instances of the new class. This may contain a special member named
+	 *   `constructor`, which is used to define the constructor function of the new subclass. If this property is *not* specified,
+	 *   a constructor function is generated and returned which just calls the superclass's constructor, passing on its parameters.
+	 *   **It is essential that you call the superclass constructor in any provided constructor.** See example code.
 	 * @return {Function} The subclass constructor from the `overrides` parameter, or a generated one if not provided.
 	 */
 	Class.extend = (function() {
 		// Set up some private vars that will be used with the extend() method
 		var objectConstructor = Object.prototype.constructor,
-		    superclassMethodCallRegex = /xyz/.test( function(){var xyz;} ) ? /\b_super\b/ : /.*/;  // a regex to see if the _super() method is called within a function, for JS implementations that allow a function's text to be converted to a string 
+		    superclassMethodCallRegex = /xyz/.test( function(){ var xyz; } ) ? /\b_super\b/ : /.*/;  // a regex to see if the _super() method is called within a function, for JS implementations that allow a function's text to be converted to a string 
 		
 		// inline override function
 		var inlineOverride = function( o ) {
@@ -325,7 +339,7 @@ var Class = (function() {
 				this[ m ] = o[ m ];
 			}
 		};
-			
+		
 	
 		// extend() method itself
 		return function( superclass, overrides ) {			
@@ -336,14 +350,16 @@ var Class = (function() {
 			}
 			
 			
-			var subclass, 
+			var subclass,           // the actual subclass's constructor function which will be created. This ends up being a wrapper for the subclassCtorImplFn, which the user defines
+			    subclassCtorImplFn, // the actual implementation of the subclass's constructor, which the user defines
 			    F = function(){}, 
 			    subclassPrototype,
 			    superclassPrototype = superclass.prototype,
 			    prop;
 			
 			
-			// Grab any special properties from the overrides
+			// Grab any special properties from the overrides, and then delete them so that they aren't
+			// applied to the subclass's prototype when we copy all of the 'overrides' properties there
 			var statics = overrides.statics,
 			    inheritedStatics = overrides.inheritedStatics,
 			    mixins = overrides.mixins;
@@ -408,12 +424,27 @@ var Class = (function() {
 			// --------------------------
 			
 			
-			// Now that preprocessing is complete, define the new subclass
+			// Now that preprocessing is complete, define the new subclass's constructor *implementation* function. 
+			// This is going to be wrapped in the actual subclass's constructor
 			if( overrides.constructor !== objectConstructor ) {
-				subclass = overrides.constructor;
+				subclassCtorImplFn = overrides.constructor;
+				delete overrides.constructor;  // Remove 'constructor' property from overrides here, so we don't accidentally re-apply it to the subclass prototype when we copy all properties over
 			} else {
-				subclass = ( superclass === Object ) ? function(){} : function() { return superclass.apply( this, arguments ); };   // create a "default constructor" that automatically calls the superclass's constructor, unless the superclass is Object (in which case we don't need to, as we already have a new object)
+				subclassCtorImplFn = ( superclass === Object ) ? function(){} : function() { return superclass.apply( this, arguments ); };   // create a "default constructor" that automatically calls the superclass's constructor, unless the superclass is Object (in which case we don't need to, as we already have a new object)
 			}
+			
+			// Create the actual subclass's constructor, which tests to see if the class being instantiated is abstract,
+			// and if not, calls the subclassCtorFn implementation function
+			subclass = function() {
+				var proto = this.constructor.prototype;
+				if( proto.hasOwnProperty( 'abstractClass' ) && proto.abstractClass === true ) {
+					throw new Error( "Error: Cannot instantiate abstract class" );
+				}
+				
+				// Call the actual constructor's implementation
+				return subclassCtorImplFn.apply( this, arguments );
+			};
+			
 			
 			F.prototype = superclassPrototype;
 			subclassPrototype = subclass.prototype = new F();  // set up prototype chain
@@ -433,15 +464,11 @@ var Class = (function() {
 			// Attach new instance methods to the subclass
 			subclassPrototype.superclass = subclassPrototype.supr = function() { return superclassPrototype; };
 			subclassPrototype.override = inlineOverride;   // inlineOverride function defined above
-			subclassPrototype.hasMixin = function( mixin ) { return Class.hasMixin( this.constructor, mixin ); };   // inlineOverride function defined above
+			subclassPrototype.hasMixin = function( mixin ) { return Class.hasMixin( this.constructor, mixin ); };
 			
 			// Finally, add the properties/methods defined in the "overrides" config (which is basically the subclass's 
 			// properties/methods) onto the subclass prototype now.
 			Class.override( subclass, overrides );
-			
-			// Expose the constructor property on the class itself (as opposed to only on its prototype, which is normally only
-			// available to instances of the class)
-			subclass.constructor = subclassPrototype.constructor;
 			
 			
 			// -----------------------------------

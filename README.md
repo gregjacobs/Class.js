@@ -6,6 +6,7 @@ No, really, if you're not using OOP in JavaScript, you're doing it wrong. Grante
 
 - Create classes in JavaScript (where JavaScript doesn't actually have a formal notion of a "class"), easily setting up instance properties / methods.
 - Singly-inherit from other classes (just like Java, C#, or any other OOP language does), and easily call superclass constructors/methods from overridden constructors/methods in subclasses
+- Declare abstract classes
 - Add mixin classes as a form of multiple inheritance, or the ability to implement interfaces.
 - Add static methods which are automatically inherited by subclasses.
 - Add a special static method (onClassExtended) which allows for the static initialization of the class itself (much like a static initializer does in Java).
@@ -553,8 +554,53 @@ var Duck = Class( {
 One last note: if the class includes multiple mixins that all define the same property/method, the mixins defined later in the `mixins` array take precedence (as would happen with multiple inheritance in C++).
 
 
+## Abstract Classes
 
-## onClassExtended
+A class may be specified with the special property `abstractClass` on its prototype, to prevent direct instantiation of the class. (Unfortunately it couldn't simply be the word `abstract`, as `abstract` is a reserved word in JavaScript for possible future use). For example:
+
+```javascript
+
+// An abstract class which serves as the base class of Car and Truck
+var Vehicle = Class( {
+	abstractClass: true,
+	
+	constructor : function( make, model ) {
+		this.make = make;
+		this.model = model;
+	},
+	
+	// An abstract method -- must be implemented in subclass
+	getMaxSpeed : Class.abstractMethod
+	
+} );
+
+
+// Concrete class
+var Car = Vehicle.extend( {
+	getMaxSpeed : function() { return 130; }
+} );
+
+// Concrete class
+var Truck = Vehicle.extend( {
+	getMaxSpeed : function() { return 80; }
+} );
+
+
+// Attempt to instantiate a Vehicle directly
+var vehicle = new Vehicle( 'Chevy', 'P.O.S.' );   // error! Cannot instantiate abstract class
+
+// Now concrete vehicle types
+var car = new Car( 'Honda', 'Accord' );
+alert( car.getMaxSpeed() );  // 130
+
+var truck = new Truck( 'Ford', 'F150' );
+alert( truck.getMaxSpeed() );  // 80
+
+```
+
+
+
+## onClassExtended (a static initializer)
 
 This is a special method that may be defined under the `statics` or `inheritedStatics` section, which is executed when the class is finished being created (i.e. its inheritance chain has been set up, its mixins have been set up, etc). This can be used as a static initializer for the class, which you may use to set up the class itself (if there is anything to do at this time). Although rarely used, it is very useful for setting up static properties for an entire hierarchy of subclasses (when the `onClassExtended` method exists under `inheritedStatics`).
 
@@ -592,6 +638,10 @@ alert( MySubClass.uniqueId );  // alerts: 2
 
 
 ## Changelog:
+
+### 0.2
+
+* Implemented the ability to declare abstract classes. 
 
 ### 0.1.3.1
 
