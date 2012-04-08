@@ -552,7 +552,9 @@ var Duck = Class( {
 One last note: if the class includes multiple mixins that all define the same property/method, the mixins defined later in the `mixins` array take precedence (as would happen with multiple inheritance in C++).
 
 
-## Abstract Classes
+## Abstract Classes / Methods
+
+### Abstract Classes
 
 A class may be specified with the special property `abstractClass` on its prototype, to prevent direct instantiation of the class. This enforces that a concrete subclass must be created to implement the abstract class's interface. 
 
@@ -600,6 +602,60 @@ alert( truck.getMaxSpeed() );  // 80
 ```
 
 
+### Abstract Methods
+
+To declare a method as abstract, set it to the function referred to by `Class.abstractMethod`. This allows for "compile time" (i.e. class creation time) checking that concrete classes implement all abstract methods from their base class(es). It also allows for a warning for when a class is declared having abstract methods, but is not declared with `abstractClass: true`.
+
+Ex:
+
+```javascript
+
+var Appliance = Class( {
+	abstractClass: true,  // this must be set for a class which has an abstract method
+	
+	turnOn  : Class.abstractMethod,
+	turnOff : Class.abstractMethod
+} );
+
+
+var Oven = Appliance.extend( {
+	turnOn : function() { 
+		// ... 
+	},
+	turnOff : function() { 
+		// ... 
+	},
+	
+	someOtherMethod : function() {}
+} );
+
+```
+
+However, if we forget to implement an abstract method, we get an error right off the bat reminding us to do so (as opposed to only getting an error when the abstract method is called):
+
+```javascript
+
+var Appliance = Class( {
+	abstractClass: true,  // this must be set for a class which has an abstract method
+	
+	turnOn  : Class.abstractMethod,
+	turnOff : Class.abstractMethod
+} );
+
+
+// Errors because this class forgets to implement the `turnOff` method, and is not declared as abstract itself
+var Oven = Appliance.extend( {
+	turnOn : function() { 
+		// ... 
+	},
+	// Whoops!!! Forgot to implement the `turnOff` method. Error!
+	
+	someOtherMethod : function() {}
+} );
+
+```
+
+
 
 ## onClassExtended (a static initializer)
 
@@ -639,6 +695,10 @@ alert( MySubClass.uniqueId );  // alerts: 2
 
 
 ## Changelog:
+
+### 0.2.1
+
+* Implemented the ability to declare abstract methods, and enforce that they are implemented in concrete subclasses. 
 
 ### 0.2
 

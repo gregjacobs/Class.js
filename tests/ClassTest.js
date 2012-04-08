@@ -851,9 +851,18 @@ Ext.test.Session.addSuite( {
 							"A class created with `abstractClass: true` should not be able to be instantiated when declared with no constructor" : 
 								"Error: Cannot instantiate abstract class",
 							"A class created with `abstractClass: true` should not be able to be instantiated when declared with its own constructor" :
-								"Error: Cannot instantiate abstract class"
+								"Error: Cannot instantiate abstract class",
+							
+							"extend() should throw an error for a class with abstract methods that is not declared with abstractClass: true" :
+								"The class being created has abstract method 'abstractMethod', but is not declared with 'abstractClass: true'",
+							"extend() should throw an error if a concrete class does not implement all abstract methods from its superclass" :
+								"The concrete subclass being created must implement abstract method: 'abstractMethod2', or be declared abstract as well (using 'abstractClass: true')"
 						}
 					},
+					
+					// ---------------------------
+					
+					// Test abstract classes themselves
 					
 					
 					"A class created with `abstractClass: true` should not be able to be instantiated when declared with no constructor" : function() {
@@ -928,6 +937,83 @@ Ext.test.Session.addSuite( {
 						
 						var instance = new ConcreteClass();
 						Y.Assert.areSame( 1, abstractClassConstructorCallCount, "The abstract class's constructor should have been called exactly once" );
+					},
+					
+					
+					// ------------------------------
+					
+					
+					// Test classes with abstract methods
+					
+					"extend() should throw an error for a class with abstract methods that is not declared with abstractClass: true" : function() {
+						var ConcreteClass = Class( {
+							concreteMethod : function() {},
+							abstractMethod : Class.abstractMethod
+						} );
+						
+						Y.Assert.fail( "Test should have thrown an error for a concrete class with an abstract method" );
+					},
+					
+					"extend() should throw an error if a concrete class does not implement all abstract methods from its superclass" : function() {
+						var AbstractClass = Class( {
+							abstractClass : true,
+							
+							concreteMethod : function() {},
+							abstractMethod1 : Class.abstractMethod,
+							abstractMethod2 : Class.abstractMethod
+						} );
+						
+						var ConcreteClass = AbstractClass.extend( {
+							// *** Only implement 1 of the 2 abstract methods
+							abstractMethod1 : function(){}
+						} );
+						
+						Y.Assert.fail( "Test should have thrown an error for a concrete class with an abstract method (abstractMethod2 not implemented)" );
+					},
+					
+					"extend() should allow a properly defined abstract class with abstract methods, and a concrete class with the abstract methods implemented" : function() {
+						var AbstractClass = Class( {
+							abstractClass : true,
+							
+							concreteMethod : function() {},
+							abstractMethod1 : Class.abstractMethod,
+							abstractMethod2 : Class.abstractMethod
+						} );
+						
+						var ConcreteClass = AbstractClass.extend( {
+							// Implement both of the abstract methods
+							abstractMethod1 : function(){},
+							abstractMethod2 : function(){}
+						} );
+						
+						// This test should simply not error -- both abstract methods have been implemented by ConcreteClass
+					},
+					
+					
+					"extend() should allow a hierarchy of properly defined abstract classes with abstract methods, and a concrete class with the abstract methods implemented" : function() {
+						var AbstractClass = Class( {
+							abstractClass : true,
+							
+							concreteMethod : function() {},
+							
+							// 2 abstract methods
+							abstractMethod1 : Class.abstractMethod,
+							abstractMethod2 : Class.abstractMethod
+						} );
+						
+						var AbstractSubclass = AbstractClass.extend( {
+							abstractClass : true,
+							
+							// Implement one of the abstract methods
+							abstractMethod1 : function() {}
+						} );
+						
+						var ConcreteClass = AbstractSubclass.extend( {
+							// Implement the other abstract method
+							abstractMethod2 : function(){}
+						} );
+						
+						// This test should simply not error -- abstractMethod1 implemented by AbstractSubclass, and abstractMethod2 implemented by ConcreteClass
 					}
 				},
 				

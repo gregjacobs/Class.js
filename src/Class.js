@@ -346,6 +346,7 @@ var Class = (function() {
 			    F = function(){}, 
 			    subclassPrototype,
 			    superclassPrototype = superclass.prototype,
+			    abstractClass = !!overrides.abstractClass,
 			    prop;
 			
 			
@@ -461,6 +462,22 @@ var Class = (function() {
 			// properties/methods) onto the subclass prototype now.
 			Class.override( subclass, overrides );
 			
+			
+			// -----------------------------------
+			
+			// Check that if it is a concrete (i.e. non-abstract) class, that all abstract methods have been implemented
+			// (i.e. that the concrete class overrides any `Class.abstractMethod` functions from its superclass)
+			if( !abstractClass ) {
+				for( var methodName in subclassPrototype ) {
+					if( subclassPrototype[ methodName ] === Class.abstractMethod ) {  // NOTE: Do *not* filter out prototype properties; we want to test them
+						if( subclassPrototype.hasOwnProperty( methodName ) ) {
+							throw new Error( "The class being created has abstract method '" + methodName + "', but is not declared with 'abstractClass: true'" );
+						} else {
+							throw new Error( "The concrete subclass being created must implement abstract method: '" + methodName + "', or be declared abstract as well (using 'abstractClass: true')" );
+						}
+					}
+				}
+			}
 			
 			// -----------------------------------
 			
