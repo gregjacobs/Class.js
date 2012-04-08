@@ -243,7 +243,7 @@ cat.eat();   // "Leonardo Di Fishy is eating"
 
 
 
-### Using Class.js to extend classes from other frameworks
+### Extending classes from other frameworks
 
 Because this implementation does not rely on making `Class` the superclass of all classes, Class.js can also be used to extend classes from other frameworks using `Class.extend()` (if those classes rely on prototype-chained inheritance behind the scenes, as Class.js does), to be able to add Class.js features (mixins, inherited static properties, etc) to new subclasses of another hierarchy. Ex:
 
@@ -556,7 +556,7 @@ One last note: if the class includes multiple mixins that all define the same pr
 
 ### Abstract Classes
 
-A class may be specified with the special property `abstractClass` on its prototype, to prevent direct instantiation of the class. This enforces that a concrete subclass must be created to implement the abstract class's interface. 
+A class may be declared with the special property `abstractClass` on its prototype, to prevent direct instantiation of the class. This enforces that a concrete subclass must be created to implement the abstract class's interface. 
 
 (Note: Unfortunately, I had to use a property name other than simply the word `abstract`, as `abstract` is a reserved word in JavaScript). 
 
@@ -604,7 +604,7 @@ alert( truck.getMaxSpeed() );  // 80
 
 ### Abstract Methods
 
-To declare a method as abstract, set it to the function referred to by `Class.abstractMethod`. This allows for "compile time" (i.e. class creation time) checking that concrete classes implement all abstract methods from their base class(es). It also allows for a warning for when a class is declared having abstract methods, but is not declared with `abstractClass: true`.
+To declare a method as abstract, set it to the function referred to by `Class.abstractMethod`. This allows for "compile time" (i.e. class creation time) checking that concrete classes implement all abstract methods from their abstract base class(es). It also allows for a warning for when a class is defined as having abstract methods, but is not declared with `abstractClass: true`.
 
 Ex:
 
