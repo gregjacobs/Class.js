@@ -35,7 +35,7 @@ var Car = Class.extend( Object, {
 	constructor : function() {
 		// constructor logic goes here
 	}
-} )
+} );
 ```
 
 Using the `Class()` function directly literally just calls `Class.extend()` behind the scenes.
