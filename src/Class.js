@@ -602,20 +602,23 @@ var Class = (function() {
 	 * @return {Boolean} True if the `subclass` is derived from `superclass` (or is equal to `superclass`), false otherwise.
 	 */
 	Class.isSubclassOf = function( subclass, superclass ) {
-		if( subclass === superclass ) {
+		if( typeof subclass !== 'function' || typeof superclass !== 'function' ) {
+			return false;
+			
+		} else if( subclass === superclass ) {
 			// `subclass` is `superclass`, return true 
 			return true;
 			
 		} else {
 			// Walk the prototype chain of `subclass`, looking for `superclass`
-			var currentClassProto = subclass.__super__,
-			    currentClass = currentClassProto.constructor;
+			var currentClass = subclass,
+			    currentClassProto = currentClass.prototype;
 			
-			do {
+			while( ( currentClass = ( currentClassProto = currentClass.__super__ ) && currentClassProto.constructor ) ) {  // extra set of parens to get JSLint to stop complaining about an assignment inside a while expression
 				if( currentClassProto.constructor === superclass ) {
 					return true;
 				}
-			} while( ( currentClass = ( currentClassProto = currentClass.__super__ ) && currentClassProto.constructor ) );  // extra set of parens to get JSLint to stop complaining about an assignment inside a while expression
+			}
 		}
 		
 		return false;

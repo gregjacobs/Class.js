@@ -1257,16 +1257,36 @@ Ext.test.Session.addSuite( {
 			name : "Test isSubclassOf()",
 			
 			
-			"isSubclassOf() should determine if a class is the same as, or derived from (i.e. extends) another" : function() {
-				var Superclass = Class( {} );
-				var Subclass = Superclass.extend( {} );
-				
-				Y.Assert.isTrue( Class.isSubclassOf( Subclass, Superclass ), "should be true - Subclass is derived from (i.e. extends) Superclass" );
-				Y.Assert.isTrue( Class.isSubclassOf( Superclass, Superclass ), "should be true - Superclass is the same class as itself" );
-				Y.Assert.isTrue( Class.isSubclassOf( Subclass, Subclass ), "should be true - Subclass is the same class as itself" );
-				Y.Assert.isFalse( Class.isSubclassOf( Superclass, Subclass ), "should be false - Superclass is *not* derived from Subclass" );
-			}
+			setUp : function() {
+				this.Superclass = Class( {} );
+				this.Subclass = this.Superclass.extend( {} );
+				this.SubSubclass = this.Subclass.extend( {} );
+			},
 			
+			
+			"isSubclassOf() should return false if either of the argument values are falsy" : function() {
+				Y.Assert.isFalse( Class.isSubclassOf( undefined, this.Superclass ), "should be false with undefined first arg" );
+				Y.Assert.isFalse( Class.isSubclassOf( this.Superclass, undefined ), "should be false with undefined second arg" );
+				Y.Assert.isFalse( Class.isSubclassOf( undefined, undefined ), "should be false with both args undefined" );
+			},
+			
+			
+			"isSubclassOf() should return true the given classes are equal" : function() {
+				Y.Assert.isTrue( Class.isSubclassOf( this.Superclass, this.Superclass ), "should be true - Superclass is the same class as itself" );
+				Y.Assert.isTrue( Class.isSubclassOf( this.Subclass, this.Subclass ), "should be true - Subclass is the same class as itself" );
+			},
+			
+			"isSubclassOf() should return true if the subclass is derived from (i.e. extends) superclass" : function() {
+				Y.Assert.isTrue( Class.isSubclassOf( this.Subclass, this.Superclass ), "should be true - Subclass is derived from (i.e. extends) Superclass" );
+				Y.Assert.isTrue( Class.isSubclassOf( this.SubSubclass, this.Superclass ), "should be true - SubSubclass is derived from (i.e. extends) Superclass" );
+				Y.Assert.isTrue( Class.isSubclassOf( this.SubSubclass, this.Subclass ), "should be true - SubSubclass is derived from (i.e. extends) Subclass" );
+			},
+			
+			
+			"isSubclassOf() should return false if the subclass is *not* derived from superclass" : function() {
+				Y.Assert.isFalse( Class.isSubclassOf( this.Superclass, this.Subclass ), "should be false - Superclass is *not* derived from Subclass" );
+				Y.Assert.isFalse( Class.isSubclassOf( this.Subclass, this.SubSubclass ), "should be false - Subclass is *not* derived from SubSubclass" );
+			}
 		},
 		
 		
