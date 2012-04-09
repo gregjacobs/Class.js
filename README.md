@@ -696,6 +696,10 @@ alert( MySubClass.uniqueId );  // alerts: 2
 
 ## Changelog:
 
+### 0.3
+
+* Added `Class.isSubclassOf` method, for statically testing if a class is a subclass of another (without creating instances).
+
 ### 0.2.2
 
 * A little code cleanup.

@@ -580,6 +580,48 @@ var Class = (function() {
 	};
 	
 	
+	/**
+	 * Determines if a class (i.e. constructor function) is, or is a subclass of, the given `baseClass`.
+	 * 
+	 * The order of the arguments follows how {@link #isInstanceOf} accepts them (as well as the JavaScript
+	 * `instanceof` operator. Try reading it as if there was a `subclassof` operator, i.e. `subcls subclassof supercls`.
+	 * 
+	 * Example:
+	 *     var Superclass = Class( {} );
+	 *     var Subclass = Superclass.extend( {} );
+	 *     
+	 *     Class.isSubclassOf( Subclass, Superclass );   // true - Subclass is derived from (i.e. extends) Superclass
+	 *     Class.isSubclassOf( Superclass, Superclass ); // true - Superclass is the same class as itself
+	 *     Class.isSubclassOf( Subclass, Subclass );     // true - Subclass is the same class as itself
+	 *     Class.isSubclassOf( Superclass, Subclass );   // false - Superclass is *not* derived from Subclass
+	 * 
+	 * @static
+	 * @method isSubclassOf
+	 * @param {Function} subclass The class to test.
+	 * @param {Function} superclass The class to test against.
+	 * @return {Boolean} True if the `subclass` is derived from `superclass` (or is equal to `superclass`), false otherwise.
+	 */
+	Class.isSubclassOf = function( subclass, superclass ) {
+		if( subclass === superclass ) {
+			// `subclass` is `superclass`, return true 
+			return true;
+			
+		} else {
+			// Walk the prototype chain of `subclass`, looking for `superclass`
+			var currentClassProto = subclass.__super__,
+			    currentClass = currentClassProto.constructor;
+			
+			do {
+				if( currentClassProto.constructor === superclass ) {
+					return true;
+				}
+			} while( ( currentClass = ( currentClassProto = currentClass.__super__ ) && currentClassProto.constructor ) );  // extra set of parens to get JSLint to stop complaining about an assignment inside a while expression
+		}
+		
+		return false;
+	};
+	
+	
 	
 	/**
 	 * Determines if a class has a given mixin. Note: Most likely, you will want to use {@link #isInstanceOf} instead,

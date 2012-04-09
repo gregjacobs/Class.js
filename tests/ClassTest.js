@@ -1251,6 +1251,26 @@ Ext.test.Session.addSuite( {
 		
 		
 		/*
+		 * Test isSubclassOf()
+		 */
+		{
+			name : "Test isSubclassOf()",
+			
+			
+			"isSubclassOf() should determine if a class is the same as, or derived from (i.e. extends) another" : function() {
+				var Superclass = Class( {} );
+				var Subclass = Superclass.extend( {} );
+				
+				Y.Assert.isTrue( Class.isSubclassOf( Subclass, Superclass ), "should be true - Subclass is derived from (i.e. extends) Superclass" );
+				Y.Assert.isTrue( Class.isSubclassOf( Superclass, Superclass ), "should be true - Superclass is the same class as itself" );
+				Y.Assert.isTrue( Class.isSubclassOf( Subclass, Subclass ), "should be true - Subclass is the same class as itself" );
+				Y.Assert.isFalse( Class.isSubclassOf( Superclass, Subclass ), "should be false - Superclass is *not* derived from Subclass" );
+			}
+			
+		},
+		
+		
+		/*
 		 * Test hasMixin()
 		 */
 		{
