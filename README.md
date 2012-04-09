@@ -696,6 +696,10 @@ alert( MySubClass.uniqueId );  // alerts: 2
 
 ## Changelog:
 
+### 0.2.2
+
+* A little code cleanup.
+
 ### 0.2.1
 
 * Implemented the ability to declare abstract methods, and enforce that they are implemented in concrete subclasses. 

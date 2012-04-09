@@ -1,6 +1,6 @@
 /*!
  * Class.js
- * Version 0.2.1
+ * Version 0.2.2
  * 
  * Copyright(c) 2012 Gregory Jacobs.
  * MIT Licensed. http://www.opensource.org/licenses/mit-license.php
@@ -330,13 +330,12 @@ var Class = (function() {
 	 */
 	Class.extend = (function() {
 		// Set up some private vars that will be used with the extend() method
-		var objectConstructor = Object.prototype.constructor,
-		    superclassMethodCallRegex = /xyz/.test( function(){ var xyz; } ) ? /\b_super\b/ : /.*/;  // a regex to see if the _super() method is called within a function, for JS implementations that allow a function's text to be converted to a string 
+		var superclassMethodCallRegex = /xyz/.test( function(){ var xyz; } ) ? /\b_super\b/ : /.*/;  // a regex to see if the _super() method is called within a function, for JS implementations that allow a function's text to be converted to a string 
 		
-		// inline override function
-		var inlineOverride = function( o ) {
-			for( var m in o ) {
-				this[ m ] = o[ m ];
+		// inline override() function which is attached to subclass constructor functions
+		var inlineOverride = function( obj ) {
+			for( var p in obj ) {
+				this[ p ] = obj[ p ];
 			}
 		};
 		
@@ -427,7 +426,7 @@ var Class = (function() {
 			
 			// Now that preprocessing is complete, define the new subclass's constructor *implementation* function. 
 			// This is going to be wrapped in the actual subclass's constructor
-			if( overrides.constructor !== objectConstructor ) {
+			if( overrides.constructor !== Object ) {
 				subclassCtorImplFn = overrides.constructor;
 				delete overrides.constructor;  // Remove 'constructor' property from overrides here, so we don't accidentally re-apply it to the subclass prototype when we copy all properties over
 			} else {
@@ -451,11 +450,6 @@ var Class = (function() {
 			subclassPrototype = subclass.prototype = new F();  // set up prototype chain
 			subclassPrototype.constructor = subclass;          // fix constructor property
 			subclass.superclass = subclass.__super__ = superclassPrototype;
-			
-			// If the superclass is Object, set its constructor property to itself (`Function`, which is what the real superclass is now)
-			if( superclassPrototype.constructor === objectConstructor ) {
-				superclassPrototype.constructor = superclass;
-			}
 			
 			// Attach new static methods to the subclass
 			subclass.override = function( overrides ) { Class.override( subclass, overrides ); };

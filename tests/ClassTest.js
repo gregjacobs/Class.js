@@ -242,6 +242,52 @@ Ext.test.Session.addSuite( {
 					},
 					
 					
+					"extend() should allow the constructor of a class that extends from Object to call its superclass constructor" : function() {
+						var MyClass = Class.extend( Object, {
+							constructor : function() {
+								this._super();
+							}
+						} );
+					},
+					
+					
+					// -----------------------------------
+					
+					// Test that the constructor is called with the correct scope
+					
+					"extend() should call the constructor implementation in the correct scope for both user-defined constructors, and default constructors" : function() {
+						var superclassMethodCallCount = 0;
+						
+						var MyClass = Class.extend( {
+							constructor : function() {
+								this.superclassMethod();
+							},
+							
+							superclassMethod : function() {
+								superclassMethodCallCount++;
+							}
+						} );
+						var MySubclass = MyClass.extend( {
+							constructor : function() {
+								this._super( arguments );
+								this.superclassMethod();
+							}
+						} );
+						
+						var instance = new MySubclass();
+						Y.Assert.areSame( 2, superclassMethodCallCount, "The superclassMethod should have been called exactly twice: once from each class's constructor" );
+						
+						
+						// Reset the count and try with a class with a default constructor
+						superclassMethodCallCount = 0;
+						var MySubSubclass = MySubclass.extend( {
+							// This subclass tests the default constructor
+						} );
+						instance = new MySubSubclass();
+						Y.Assert.areSame( 2, superclassMethodCallCount, "The superclassMethod should have been called exactly twice: once from each superclass's constructor" );
+					},
+					
+					
 					// -----------------------------------
 					
 					// Test the constructor property on instances
