@@ -699,6 +699,7 @@ alert( MySubClass.uniqueId );  // alerts: 2
 ### 0.3.1
 
 * Fixed the 'superclassMethodCallRegex' in the extend() method to work correctly when Class.js is minified, and the variable name inside the "check's" function is rewritten.
+* Fixed extend() to not wrap constructor functions of another class (which may be placed on a prototype) with a this._super() calling method.
 
 ### 0.3
 

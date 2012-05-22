@@ -602,6 +602,48 @@ Ext.test.Session.addSuite( {
 								Y.Assert.fail( "The test threw an error that didn't have to do with the _super() method. The error message is: " + ex.message );
 							}
 						}
+					},
+					
+					
+					// --------------------------
+					
+					
+					// Tests for a property added to a prototype that happens to be a constructor function of another class. We don't want to wrap the constructor function.
+					
+					"extend() should *not* wrap the constructor function of another class with the _super() calling method" : function() {
+						var InnerClass = Class( {
+							constructor : function() {
+								this._super();   // This constructor calls this._super(), but we won't want it wrapped with the this._super() calling function from OuterClass
+							}
+						} );
+						
+						var OuterSuperClass = Class( {  // a superclass, because 'innerClass' will only be wrapped if the superclass has a property with the same name, and is also a function
+							innerClass : function() {}
+						} );
+						var OuterSubClass = OuterSuperClass.extend( {
+							innerClass : InnerClass
+						} );
+						
+						Y.Assert.areSame( InnerClass, OuterSubClass.prototype.innerClass, "The 'innerClass' on OuterClass's prototype should be the exact InnerClass constructor function reference, not a this._super() wrapping function (or anything else...)" );
+					},
+					
+					
+					"extend() should *not* wrap the constructor function of another class with the _super() calling method, in JS implementations that do not support reading the function's text" : function() {
+						// A "class" that will be wrapped by the this._super() calling method. This is to emulate a class created with Class.js on browsers that *do*
+						// support reading the function's text. We can't use the actual constructor that Class.js creates, because that does not have the text "_super" in it
+						var InnerClass = function() {
+							this._super();   // This constructor calls this._super(), but we won't want it wrapped with the this._super() calling function from OuterClass
+						};
+						InnerClass.__Class = true;  // the flag we're using to determine if a constructor function is a class. No other way to determine...  This is set when the class is created.
+						
+						var OuterSuperClass = Class( {  // a superclass, because 'innerClass' will only be wrapped if the superclass has a property with the same name, and is also a function
+							innerClass : function() {}
+						} );
+						var OuterSubClass = OuterSuperClass.extend( {
+							innerClass : InnerClass
+						} );
+						
+						Y.Assert.areSame( InnerClass, OuterSubClass.prototype.innerClass, "The 'innerClass' on OuterClass's prototype should be the exact InnerClass constructor function reference, not a this._super() wrapping function (or anything else...)" );
 					}
 				},
 				
