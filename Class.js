@@ -1,6 +1,6 @@
 /*!
  * Class.js
- * Version 0.3
+ * Version 0.3.1
  * 
  * Copyright(c) 2012 Gregory Jacobs.
  * MIT Licensed. http://www.opensource.org/licenses/mit-license.php
@@ -330,7 +330,7 @@ var Class = (function() {
 	 */
 	Class.extend = (function() {
 		// Set up some private vars that will be used with the extend() method
-		var superclassMethodCallRegex = /xyz/.test( function(){ var xyz; } ) ? /\b_super\b/ : /.*/;  // a regex to see if the _super() method is called within a function, for JS implementations that allow a function's text to be converted to a string 
+		var superclassMethodCallRegex = /xyz/.test( function(){ var a = "xyz"; } ) ? /\b_super\b/ : /.*/;  // a regex to see if the _super() method is called within a function, for JS implementations that allow a function's text to be converted to a string. Note, need to keep the "xyz" as a string, so minifiers don't re-write it. 
 		
 		// inline override() function which is attached to subclass constructor functions
 		var inlineOverride = function( obj ) {
@@ -341,7 +341,7 @@ var Class = (function() {
 		
 	
 		// extend() method itself
-		return function( superclass, overrides ) {			
+		return function( superclass, overrides ) {	
 			// The first argument may be omitted, making Object the superclass
 			if( arguments.length === 1 ) {
 				overrides = superclass;

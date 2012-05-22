@@ -696,6 +696,10 @@ alert( MySubClass.uniqueId );  // alerts: 2
 
 ## Changelog:
 
+### 0.3.1
+
+* Fixed the 'superclassMethodCallRegex' in the extend() method to work correctly when Class.js is minified, and the variable name inside the "check's" function is rewritten.
+
 ### 0.3
 
 * Added `Class.isSubclassOf` method, for statically testing if a class is a subclass of another (without creating instances).
