@@ -2,7 +2,7 @@
 
 Add some class(es) to your JavaScript! 
 
-No, really, if you're not using OOP in JavaScript, you're doing it wrong. Granted, JavaScript doesn't make it easy or straightforward to implement classical inheritance in the language, so that's what this is for! This small utility allows you to:
+No, really, if you're not using OOP in JavaScript, you're doing it wrong ;) Granted, JavaScript doesn't make it easy or straightforward to implement classical inheritance in the language, so that's what this is for! This small utility allows you to:
 
 - Create classes in JavaScript (where JavaScript doesn't actually have a formal notion of a "class"), easily setting up instance properties / methods.
 - Singly-inherit from other classes (just like Java, C#, or any other OOP language does), and easily call superclass constructors/methods from overridden constructors/methods in subclasses
@@ -11,7 +11,7 @@ No, really, if you're not using OOP in JavaScript, you're doing it wrong. Grante
 - Add static methods which are automatically inherited by subclasses.
 - Add a special static method (onClassExtended) which allows for the static initialization of the class itself (much like a static initializer does in Java).
 
-###### \* Note: As much as I preferred to simply leave my blanket statement of "you're doing it wrong" without explanation, a friend of mine asked me to elaborate. So what I mean by this is that without OOP, you are most likely not writing reusable, extensible, maintainable, and testable code (yes, you *should* be writing unit tests for your JavaScript, just like you would with any other language). 
+Using this utility, and OOP in general, allows you to more easily write reusable, extensible, maintainable, and testable code.
 
 
 ## Creating and Extending a Class
