@@ -65,9 +65,18 @@
  *     dog2.eat();  // "Bolt is eating"
  *     cat.eat();   // "Leonardo Di Fishy is eating"
  */
-/*global window */
+/*global window, define */
 /*jslint forin:true */
-var Class = (function() {
+
+// Initialization handles the availability of an AMD loader (like require.js, which has function `define()`).
+// If no AMD loader, injects browser global `Class`
+(function( root, factory ) {
+	if( typeof define === 'function' && define.amd ) {
+		define( factory );       // Handle availability of AMD loader
+	} else {
+		root.Class = factory();  // Browser global (root == window)
+	}
+}( this, function() {
 	
 	// Utility functions / variables	
 	
@@ -184,7 +193,7 @@ var Class = (function() {
 		if( defaults ) {
 			Class.apply( o, defaults );  // no "this" reference for friendly out of scope calls
 		}
-		if( o && c && typeof c == 'object' ) {
+		if( o && c && typeof c === 'object' ) {
 			for( var p in c ) {
 				o[ p ] = c[ p ];
 			}
@@ -685,4 +694,4 @@ var Class = (function() {
 	
 	return Class;
 	
-} )();
+} ) );
