@@ -4,9 +4,9 @@
 	pkgs: [
 		{
 			name: "Class JS",
-			filename: "../Class.js",
+			filename: "Class.js",
 			includes: [
-				{ tree: "../src/" }
+				{ tree: "src/" }
 			]
 		}
 	]
