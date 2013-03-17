@@ -205,27 +205,6 @@
 	
 	
 	/**
-	 * Utility to copy all the properties of `config` to `obj`, if they don't already exist on `obj`.
-	 *
-	 * @static
-	 * @method applyIf
-	 * @param {Object} obj The receiver of the properties
-	 * @param {Object} config The source of the properties
-	 * @return {Object} returns obj
-	 */
-	Class.applyIf = function( o, c ) {
-		if( o ) {
-			for( var p in c ) {
-				if( typeof o[ p ] === 'undefined' ) {
-					o[ p ] = c[ p ];
-				}
-			}
-		}
-		return o;
-	};
-	
-	
-	/**
 	 * A function which can be referenced from class definition code to specify an abstract method.
 	 * This method (function) simply throws an error if called, meaning that the method must be overridden in a
 	 * subclass. Ex:

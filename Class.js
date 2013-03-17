@@ -80,10 +80,12 @@
 // Initialization handles the availability of an AMD loader (like require.js, which has function `define()`).
 // If no AMD loader, injects browser global `Class`
 (function( root, factory ) {
-	if( typeof define === 'function' && define.amd ) {
-		define( factory );       // Handle availability of AMD loader
+	if( typeof exports === 'object' ) {
+		module.exports = factory();  // NodeJS
+	} else if( typeof define === 'function' && define.amd ) {
+		define( factory );           // Handle availability of AMD loader
 	} else {
-		root.Class = factory();  // Browser global (root == window)
+		root.Class = factory();      // Browser global (root == window)
 	}
 }( this, function() {
 	
@@ -205,27 +207,6 @@
 		if( o && c && typeof c === 'object' ) {
 			for( var p in c ) {
 				o[ p ] = c[ p ];
-			}
-		}
-		return o;
-	};
-	
-	
-	/**
-	 * Utility to copy all the properties of `config` to `obj`, if they don't already exist on `obj`.
-	 *
-	 * @static
-	 * @method applyIf
-	 * @param {Object} obj The receiver of the properties
-	 * @param {Object} config The source of the properties
-	 * @return {Object} returns obj
-	 */
-	Class.applyIf = function( o, c ) {
-		if( o ) {
-			for( var p in c ) {
-				if( typeof o[ p ] === 'undefined' ) {
-					o[ p ] = c[ p ];
-				}
 			}
 		}
 		return o;
