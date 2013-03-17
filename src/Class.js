@@ -73,7 +73,7 @@
 (function( root, factory ) {
 	if( typeof exports === 'object' ) {
 		module.exports = factory();  // NodeJS
-	if( typeof define === 'function' && define.amd ) {
+	} else if( typeof define === 'function' && define.amd ) {
 		define( factory );           // Handle availability of AMD loader
 	} else {
 		root.Class = factory();      // Browser global (root == window)
