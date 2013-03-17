@@ -122,60 +122,6 @@ Ext.test.Session.addSuite( {
 				Y.Assert.isNull(Class.apply(null, {}), 'Test null first argument');
 			}
 		},
-			
-		
-		/*
-		 * Test applyIf()
-		 */
-		{
-			name : "Test applyIf()",
-			
-			
-			test_applyIf: function(){
-				var o1 = Class.applyIf({}, {
-					foo: 'foo',
-					bar: 'bar'
-				});
-				Y.ObjectAssert.hasKeys(o1, {
-					foo: 'foo',
-					bar: 'bar'
-				}, 'Test with an empty destination object');
-				
-				var o2 = Class.applyIf({
-					foo: 'foo'
-				}, {
-					foo: 'oldFoo'
-				});
-				Y.ObjectAssert.hasKeys(o2, {
-					foo: 'foo'
-				}, 'Ensure existing properties don\'t get overridden');
-				
-				var o3 = Class.applyIf({
-					foo: 1,
-					bar: 2
-				}, {
-					bar: 3,
-					baz: 4
-				});
-				Y.ObjectAssert.hasKeys(o3, {
-					foo: 1,
-					bar: 2,
-					baz: 4
-				}, 'Test mixing properties to be overridden');
-				
-				var o4 = {};
-				Class.applyIf(o4, {
-					foo: 2
-				}, {
-					foo: 1
-				});
-				Y.ObjectAssert.hasKeys(o4, {
-					foo: 2
-				}, 'Test that the reference of the object is changed');
-				
-				Y.Assert.isNull(Class.applyIf(null, {}), 'Test null first argument');
-			}
-		},
 		
 		
 		/*
