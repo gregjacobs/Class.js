@@ -71,10 +71,12 @@
 // Initialization handles the availability of an AMD loader (like require.js, which has function `define()`).
 // If no AMD loader, injects browser global `Class`
 (function( root, factory ) {
+	if( typeof exports === 'object' ) {
+		module.exports = factory();  // NodeJS
 	if( typeof define === 'function' && define.amd ) {
-		define( factory );       // Handle availability of AMD loader
+		define( factory );           // Handle availability of AMD loader
 	} else {
-		root.Class = factory();  // Browser global (root == window)
+		root.Class = factory();      // Browser global (root == window)
 	}
 }( this, function() {
 	
