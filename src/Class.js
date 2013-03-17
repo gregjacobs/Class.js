@@ -65,7 +65,7 @@
  *     dog2.eat();  // "Bolt is eating"
  *     cat.eat();   // "Leonardo Di Fishy is eating"
  */
-/*global window, define */
+/*global window, module, define */
 /*jslint forin:true */
 
 // Initialization handles the availability of an AMD loader (like require.js, which has function `define()`).
