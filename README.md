@@ -672,7 +672,7 @@ var MyBaseClass = Class( {
 
 	inheritedStatics : {
 		onClassExtended : function( newClass ) {
-			// newClass is the class that was just created. We can't yet reference it as MyClass 
+			// newClass is the class that was just created. We can't yet reference it as MyBaseClass 
 			// until the Class() function returns. It will also apply to subclasses as well.
 			
 			// Attach a static, unique id to this class, and each subclass extended from this one

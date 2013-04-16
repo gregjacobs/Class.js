@@ -10,7 +10,7 @@
 /**
  * @class Class
  * 
- * Utility for powerful JavaScript class creation. This provides a number of features for OOP in JavaScript, including:
+ * Simple utility for powerful JavaScript class creation. This provides a number of features for OOP in JavaScript, including:
  * 
  * - Single inheritance with subclasses (like Java, C#, etc.)
  * - Mixin classes
