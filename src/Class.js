@@ -14,7 +14,7 @@
  *   and `inheritedStatics`. The former only applies properties to the class being created, while the latter applies properties to the
  *   class being created, and all subclasses which extend it. (Note that the keyword for this had to be `statics`, and not `static`, as 
  *   `static` is a reserved word in Javascript). 
- * - A special static method, onClassExtended(), which can be placed in either the `statics` or `inheritedStatics` section, that is
+ * - A special static method, onClassCreated(), which can be placed in either the `statics` or `inheritedStatics` section, that is
  *   executed after the class has been extended.
  * 
  * Note that this is not the base class of all `Class` classes. It is a utility to create classes, and extend other classes. The
@@ -501,8 +501,12 @@
 			}
 			
 			
-			// If there is a static onClassExtended method, call it now with the new subclass as the argument
-			if( typeof subclass.onClassExtended === 'function' ) {
+			// If there is a static onClassCreated method, call it now with the new subclass as the argument
+			if( subclass.onClassCreated ) {
+				subclass.onClassCreated( subclass );
+			}
+			// Backward Compat: If there is a static onClassExtended method, call it now with the new subclass as the argument
+			if( subclass.onClassExtended ) {
 				subclass.onClassExtended( subclass );
 			}
 			

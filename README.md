@@ -2,14 +2,14 @@
 
 Add some class(es) to your JavaScript! 
 
-No, really, if you're not using OOP in JavaScript, you're doing it wrong ;) Granted, JavaScript doesn't make it easy or straightforward to implement classical inheritance in the language, so that's what this is for! This small utility allows you to:
+No, really, if you're not using OOP in JavaScript, then you're doing it wrong ;) Granted, JavaScript doesn't make it easy or straightforward to implement classical inheritance in the language, so that's what this is for! This small utility allows you to:
 
 - Create classes in JavaScript (where JavaScript doesn't actually have a formal notion of a "class"), easily setting up instance properties / methods.
 - Singly-inherit from other classes (just like Java, C#, or any other OOP language does), and easily call superclass constructors/methods from overridden constructors/methods in subclasses
 - Declare abstract classes
 - Add mixin classes as a form of multiple inheritance, or the ability to implement interfaces.
 - Add static methods which are automatically inherited by subclasses.
-- Add a special static method (onClassExtended) which allows for the static initialization of the class itself (much like a static initializer does in Java).
+- Add a special static method (onClassCreated) which allows for the static initialization of the class itself (much like a static initializer does in Java).
 
 Using this utility, and OOP in general, allows you to more easily write reusable, extensible, maintainable, and testable code.
 
@@ -657,12 +657,16 @@ var Oven = Appliance.extend( {
 
 
 
-## onClassExtended (a static initializer)
+## onClassCreated (a static initializer)
 
-This is a special method that may be defined under the `statics` or `inheritedStatics` section, which is executed when the class is finished being created (i.e. its inheritance chain has been set up, its mixins have been set up, etc). This can be used as a static initializer for the class, which you may use to set up the class itself (if there is anything to do at this time). Although rarely used, it is very useful for setting up static properties for an entire hierarchy of subclasses (when the `onClassExtended` method exists under `inheritedStatics`).
+This is a special method that may be defined under the `statics` or `inheritedStatics` section, which is executed when the class 
+is finished being created (i.e. its prototype / inheritance chain has been set up, its mixins have been set up, etc). This can be 
+used as a static initializer for the class, which you may use to set up the class itself (if there is anything to do at this time). 
+Although rarely used, it is very useful for setting up static properties for an entire hierarchy of subclasses (when the 
+`onClassCreated` method exists under `inheritedStatics`).
 
-As a very simple example, we could assign a unique id for each *class* itself (not instances) in an inheritance heirarchy, including the class that
-it was originally defined on.
+As a very simple example, we could assign a unique id for each *class* itself (not instances) in an inheritance heirarchy, including 
+the class that it was originally defined on.
 
 ```javascript
 var counter = 0;
@@ -671,7 +675,7 @@ var counter = 0;
 var MyBaseClass = Class( {
 
 	inheritedStatics : {
-		onClassExtended : function( newClass ) {
+		onClassCreated : function( newClass ) {
 			// newClass is the class that was just created. We can't yet reference it as MyBaseClass 
 			// until the Class() function returns. It will also apply to subclasses as well.
 			
@@ -683,7 +687,7 @@ var MyBaseClass = Class( {
 } );
 
 
-// empty subclass definition, but onClassExtended() still executes after it is created
+// empty subclass definition, but onClassCreated() still executes after it is created
 // because it was defined under the `inheritedStatics` section
 var MySubClass = MyBaseClass.extend( {} );  
 
@@ -695,6 +699,12 @@ alert( MySubClass.uniqueId );  // alerts: 2
 
 
 ## Changelog:
+
+### 0.3.3
+* Change `onClassExtended` to `onClassCreated` (leaving the old one for backward compatability)
+
+### 0.3.2
+* Add optional define() call for AMD loaders.
 
 ### 0.3.1
 
