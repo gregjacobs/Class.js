@@ -3,3 +3,4 @@
 .externalToolBuilders
 web.config
 /docs
+/node_modules

@@ -1,11 +1,11 @@
 /*!
  * Class.js
  * Version 0.3.2
- * 
- * Copyright(c) 2012 Gregory Jacobs.
+ *
+ * Copyright(c) 2013 Gregory Jacobs.
  * MIT Licensed. http://www.opensource.org/licenses/mit-license.php
- * 
- * https://github.com/gregjacobs/Class.js
+ *
+ * https://www.class-js.com
  */
 /**
  * @class Class
@@ -685,4 +685,3 @@
 	return Class;
 	
 } ) );
-
