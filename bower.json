@@ -1,0 +1,33 @@
+{
+  "name": "Class-js",
+  "main": "Class.js",
+  "version": "0.3.3",
+  "homepage": "https://github.com/gregjacobs/Class.js",
+  "authors": [
+    "Gregory Jacobs <greg@greg-jacobs.com>"
+  ],
+  "description": "Simple utility to allow the easy use of OOP in JS. Includes inheritance, mixins, abstract classes, inherited statics, and more.",
+  "keywords": [
+    "OOP",
+    "class",
+    "mixin",
+    "inheritance",
+    "prototype",
+    "abstract",
+    "static",
+    "superclass"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "vendor"
+  ],
+  "devDependencies": {
+    "jasmine": "~1.3.1",
+    "lodash": "official-lodash#~2.0.0"
+  }
+}
