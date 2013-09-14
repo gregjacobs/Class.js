@@ -1,12 +1,12 @@
 {
   "name": "Class-js",
   "main": "Class.js",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "homepage": "https://github.com/gregjacobs/Class.js",
   "authors": [
     "Gregory Jacobs <greg@greg-jacobs.com>"
   ],
-  "description": "Utility to allow the easy use of OOP in JS. Includes inheritance, mixins, abstract classes, inherited statics, and more.",
+  "description": "Simple and powerful utility to allow the easy use of OOP in JS. Includes inheritance, mixins, abstract classes, inherited statics, and more.",
   "keywords": [
     "OOP",
     "class",
@@ -15,7 +15,8 @@
     "prototype",
     "abstract",
     "static",
-    "superclass"
+    "superclass",
+    "subclass"
   ],
   "license": "MIT",
   "ignore": [

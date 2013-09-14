@@ -1,7 +1,7 @@
 {
   "name": "Class.js",
   "description": "",
-  "version": "0.3.3",
+  "version": "0.5.0",
   "homepage": "https://www.class-js.com",
   "author": {
     "name": "Gregory Jacobs"
@@ -24,6 +24,6 @@
     "grunt-contrib-uglify": "~0.2.0"
   },
   "keywords": [
-    "class", "class.js", "oop", "object"
+    "class", "class.js", "oop", "object", "inheritance", "mixin", "static", "prototype", "abstract", "superclass", "subclass"
   ]
 }
