@@ -699,6 +699,9 @@ alert( MySubClass.uniqueId );  // alerts: 2
 
 ## Changelog:
 
+### 0.5.0
+
+* Move distribution files into `dist/` folder.
 
 ### 0.4.0
 

@@ -53,7 +53,7 @@ module.exports = function( grunt ) {
 					banner: banner
 				},
 				src  : [ 'src/Class.js' ],  // simply adding the banner
-				dest : 'Class.js'           // to the output file
+				dest : 'dist/Class.js'      // to the output file
 			}
 		},
 		
@@ -64,7 +64,7 @@ module.exports = function( grunt ) {
 					preserveComments : 'some'  // preserve license header comments
 				},
 				files : {
-					'Class.min.js' : [ 'Class.js' ]
+					'dist/Class.min.js' : [ 'dist/Class.js' ]
 				}
 			}
 		}
