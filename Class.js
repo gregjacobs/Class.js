@@ -32,7 +32,7 @@
  *  
  * Simple example of creating classes:
  *     
- *     var Animal = Class( {
+ *     var Animal = Class.create( {
  *         constructor : function( name ) {
  *             this.name = name;
  *         },
@@ -95,7 +95,6 @@
 	 * Determines if a value is an object.
 	 * 
 	 * @private
-	 * @static
 	 * @method isObject
 	 * @param {Mixed} value
 	 * @return {Boolean} True if the value is an object, false otherwise.
@@ -120,80 +119,43 @@
 	
 	// ----------------------------------------
 	
+	var Class = {};
+	
 	
 	/**
-	 * @constructor
+	 * A function which can be referenced from class definition code to specify an abstract method.
+	 * This property (a function) simply throws an error if called, meaning that the method must be overridden 
+	 * in a subclass. This allows the function to be used to create interfaces. 
 	 * 
-	 * Creates a new class that extends from `Object` (the base class of all classes in JavaScript). Running the
-	 * `Class` constructor function is equivalent of calling {@link #extend Class.extend()}. To extend classes
-	 * that are already subclassed, use either {@link Class#extend}, or the static `extend` method that is added
-	 * to all subclasses.
+	 * This is also a special reference where if an abstract class references this property, a concrete subclass 
+	 * must implement the method.
 	 * 
-	 * Examples for the `Class` constructor:
+	 * Ex:
 	 * 
-	 *     // Create a new class, with Object as the superclass
-	 *     // (i.e. no other particular superclass; see {@link #extend} for that)
-	 *     var MyClass = new Class( {
-	 *         constructor : function() {
-	 *             console.log( "Constructing, 123" );
-	 *         },
-	 *     
-	 *         method1 : function() {},
-	 *         method2 : function() {}
+	 *     var AbstractClass = Class.create( {
+	 *         abstractClass: true,
+	 *         
+	 *         myMethod : Class.abstractMethod
 	 *     } );
 	 *     
-	 *     
-	 *     // Can be used without the `new` keyword as well, if desired.
-	 *     // This may actually make more sense, as you're creating the definition for a class, not an instance.
-	 *     var MyClass = Class( {
-	 *         constructor : function() {
-	 *             console.log( "Constructing, 123" );
-	 *         },
-	 *     
-	 *         method1 : function() {},
-	 *         method2 : function() {}
-	 *     } );
-	 *     
-	 *     
-	 *     // The above two examples are exactly equivalent to:
-	 *     var MyClass = Class.extend( Object, {
-	 *         constructor : function() {
-	 *             console.log( "Constructing, 123" );
-	 *         },
-	 *     
-	 *         method1 : function() {},
-	 *         method2 : function() {}
+	 *     var SubClass = AbstractClass.extend( {
+	 *         myMethod : function() {   // if this implementation method was missing, code would throw an error
+	 *             ...
+	 *         }
 	 *     } );
 	 * 
-	 * See {@link #extend} for details about extending classes.
-	 * 
-	 * @param {Object} classDefinition The class definition. See the `overrides` parameter of {@link #extend}.
+	 * @property {Function} abstractMethod
 	 */
-	var Class = function( classDefinition ) {
-		return Class.extend( Object, classDefinition );
+	Class.abstractMethod = function() {
+		throw new Error( "method must be implemented in subclass" );
 	};
 	
 	
 	/**
-	 * Alias of using the Class constructor function itself. Ex:
-	 * 
-	 *     var Animal = Class.create( {
-	 *         // class definition here
-	 *     } );
-	 * 
-	 * @static
-	 * @method create
-	 * @param {Object} classDefinition The class definition. See the `overrides` parameter of {@link #extend}.
-	 */
-	Class.create = function( classDefinition ) {
-		return Class.extend( Object, classDefinition );
-	};
-	
-	
-	/**
-	 * Utility to copy all the properties of `config` to `obj`.
+	 * Private utility method used to copy all the properties of `config` to `obj`. A third arguments for a "defaults"
+	 * object may also be provided.
 	 *
-	 * @static
+	 * @private
 	 * @method apply
 	 * @param {Object} obj The receiver of the properties
 	 * @param {Object} config The source of the properties
@@ -214,16 +176,21 @@
 	
 	
 	/**
-	 * A function which can be referenced from class definition code to specify an abstract method.
-	 * This method (function) simply throws an error if called, meaning that the method must be overridden in a
-	 * subclass. Ex:
+	 * Creates a new class. Equivalent to calling `Class.extend( Object, { ... } )`.
+	 * See {@link #extend} for more details.
 	 * 
-	 *     var AbstractClass = Class( {
-	 *         myMethod : Class.abstractMethod
+	 * Example:
+	 * 
+	 *     var Animal = Class.create( {
+	 *         // class definition here
 	 *     } );
+	 * 
+	 * @method create
+	 * @param {Object} classDefinition The class definition. See the `overrides` parameter of {@link #extend}.
+	 * @return {Function} The generated class (constructor function).
 	 */
-	Class.abstractMethod = function() {
-		throw new Error( "method must be implemented in subclass" );
+	Class.create = function( classDefinition ) {
+		return Class.extend( Object, classDefinition );
 	};
 	
 		
@@ -249,11 +216,8 @@
 	 *     MyComponent = Class.extend( MySuperclass, {
 	 *         
 	 *         constructor : function( config ) {
-	 *             // apply the properties of the config object to this instance
-	 *             Class.apply( this, config );
-	 *             
 	 *             // Call superclass constructor
-	 *             MyComponent.superclass.constructor.call( this );
+	 *             MyComponent.superclass.constructor.call( this, config );
 	 *             
 	 *             // Your postprocessing here
 	 *         },
@@ -279,11 +243,8 @@
 	 *         mixins : [ MyMixin ],
 	 *         
 	 *         constructor : function( config ) {
-	 *             // apply the properties of the config to the object
-	 *             Class.apply( this, config );
-	 *             
 	 *             // Call superclass constructor
-	 *             MyComponent.superclass.constructor.call( this );
+	 *             MyComponent.superclass.constructor.call( this, config );
 	 *             
 	 *             // Call the mixin's constructor
 	 *             MyMixin.constructor.call( this );
@@ -307,7 +268,6 @@
 	 * 
 	 * Note that calling superclass methods can be done with either the [Class].superclass or [Class].__super__ property.
 	 *
-	 * @static
 	 * @method extend
 	 * @param {Function} superclass The constructor function of the class being extended. If making a brand new class with no superclass, this may
 	 *   either be omitted, or provided as `Object`.
@@ -537,7 +497,6 @@
 	 *         }
 	 *     } );
 	 * 
-	 * @static
 	 * @method override
 	 * @param {Object} origclass The class to override
 	 * @param {Object} overrides The list of functions to add to origClass.  This should be specified as an object literal
@@ -561,7 +520,6 @@
 	 * or if the `jsClass` is a mixin on the `obj`. For more information about classes and mixins, see the
 	 * {@link #extend} method.
 	 * 
-	 * @static
 	 * @method isInstanceOf
 	 * @param {Mixed} obj The object (instance) to test.
 	 * @param {Function} jsClass The class (constructor function) of which to see if the `obj` is an instance of, or has a mixin of.
@@ -592,7 +550,7 @@
 	 * `instanceof` operator. Try reading it as if there was a `subclassof` operator, i.e. `subcls subclassof supercls`.
 	 * 
 	 * Example:
-	 *     var Superclass = Class( {} );
+	 *     var Superclass = Class.create( {} );
 	 *     var Subclass = Superclass.extend( {} );
 	 *     
 	 *     Class.isSubclassOf( Subclass, Superclass );   // true - Subclass is derived from (i.e. extends) Superclass
@@ -600,7 +558,6 @@
 	 *     Class.isSubclassOf( Subclass, Subclass );     // true - Subclass is the same class as itself
 	 *     Class.isSubclassOf( Superclass, Subclass );   // false - Superclass is *not* derived from Subclass
 	 * 
-	 * @static
 	 * @method isSubclassOf
 	 * @param {Function} subclass The class to test.
 	 * @param {Function} superclass The class to test against.
@@ -636,7 +593,6 @@
 	 * as that will tell you if the given class either extends another class, or either has, or extends a class with
 	 * a given mixin.
 	 * 
-	 * @static
 	 * @method hasMixin
 	 * @param {Function} classToTest
 	 * @param {Function} mixinClass

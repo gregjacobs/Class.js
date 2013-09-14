@@ -699,6 +699,12 @@ alert( MySubClass.uniqueId );  // alerts: 2
 
 ## Changelog:
 
+
+### 0.4.0
+
+* Remove `Class()` as a function which internally called `Class.create()`. This wouldn't pass JSHint validation when
+  used (JSHint expects the `new` operator for a capitalized var), and `Class.create()` is clearer anyway. 
+
 ### 0.3.3
 * Change `onClassExtended` to `onClassCreated` (leaving the old one for backward compatability)
 

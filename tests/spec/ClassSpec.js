@@ -2,107 +2,100 @@
 /*jslint evil:true */
 describe( "Class", function() {
 	
-	describe( "Test Class() constructor", function() {
+	describe( 'apply() utility method', function() {
 		
-		it( "The Class() constructor should work as if Class.extend() was called", function() {
-			var constructorCalled = false,
-			    methodCalled = false;
-			
-			var MyClass = new Class( {
-				constructor : function() { constructorCalled = true; },
-				method : function() { methodCalled = true; }
-			} );
-			
-			var instance = new MyClass();
-			expect( constructorCalled ).toBe( true );  // orig YUI Test err msg: "The constructor should have been called by instantiating the class"
-			expect( instance.method ).toBe( MyClass.prototype.method );  // orig YUI Test err msg: "The method should exist on the prototype"
-			
-			instance.method();
-			expect( methodCalled ).toBe( true );  // orig YUI Test err msg: "The method should have been called from the prototype"
-		} );
-		
-		
-		it( "The Class() constructor should work as if Class.extend() was called, even with using the `new` keyword to extend the class", function() {
-			var constructorCalled = false,
-			    methodCalled = false;
-			
-			var MyClass = new Class( {
-				constructor : function() { constructorCalled = true; },
-				method : function() { methodCalled = true; }
-			} );
-			
-			var instance = new MyClass();
-			expect( constructorCalled ).toBe( true );  // orig YUI Test err msg: "The constructor should have been called by instantiating the class"
-			expect( instance.method ).toBe( MyClass.prototype.method );  // orig YUI Test err msg: "The method should exist on the prototype"
-			
-			instance.method();
-			expect( methodCalled ).toBe( true );  // orig YUI Test err msg: "The method should have been called from the prototype"
-		} );
-		
-	} );
-	
-	
-	describe( "Test apply()", function() {
-		
-		it( "apply", function() {
-			var o1 = Class.apply({}, {
+		it( "should copy properties from the second object to the first", function() {
+			var obj = Class.apply( {}, {
 				foo: 1,
 				bar: 2
-			});
-			  // orig YUI Test err msg: 'Test simple apply, with a return value'
-			
-			var o2 = {};
-			Class.apply(o2, {
+			} );
+			expect( obj ).toEqual( { foo: 1, bar: 2 } );
+		} );
+		
+		
+		it( "should mutate the object provided as the first argument", function() {
+			var obj = {};
+			Class.apply(obj, {
 				opt1: 'x',
 				opt2: 'y'
 			});
-			  // orig YUI Test err msg: 'Test that the reference is changed'
-			
-			var o3 = Class.apply({}, {
-				prop1: 1
-			});
-			expect( o3.prop2 ).toBeUndefined();  // orig YUI Test err msg: 'Test to ensure no extra properties are copied'
-			
-			var o4 = Class.apply({
+			expect( obj ).toEqual( { opt1: 'x', opt2: 'y' } );
+		} );
+		
+		
+		it( "should overwrite properties in the first object that exist in the second object with the same name", function() {
+			var obj = Class.apply({
 				foo: 1,
 				baz: 4
 			}, {
 				foo: 2,
 				bar: 3
 			});
-			  // orig YUI Test err msg: 'Ensure that properties get overwritten by defaults'
-			
-			var o5 = {};
-			Class.apply(o5, {
+			expect( obj ).toEqual( { foo: 2, bar: 3, baz: 4 } );
+		} );
+		
+		
+		it( "should apply defaults from the 3rd object where the destination property doesn't exist", function() {
+			var obj = {};
+			Class.apply(obj, {
 				foo: 'new',
 				exist: true
 			}, {
 				foo: 'old',
 				def: true
 			});
-			  // orig YUI Test err msg: 'Test using defaults'
 			
-			var o6 = Class.apply({}, {
+			expect( obj ).toEqual( { foo: 'new', exist: true, def: true } );
+		} );
+		
+		
+		it( "should not overwrite source properties with 'defaults' properties", function() {
+			var obj = Class.apply({}, {
 				foo: 'foo',
 				bar: 'bar'
 			}, {
 				foo: 'oldFoo',
 				bar: 'oldBar'
 			});
-			  // orig YUI Test err msg: 'Test to ensure all defaults get overridden'
-			
-			expect( Class.apply(null, {}) ).toBe( null );  // orig YUI Test err msg: 'Test null first argument'
+			expect( obj ).toEqual( { foo: 'foo', bar: 'bar' } );
+		} );
+		
+		
+		it( "should return `null` if `null` is provided as the first arg", function() {
+			expect( Class.apply(null, {}) ).toBe( null );
 		} );
 		
 	} );
 	
 	
-	describe( "Test extend()", function() {
+	describe( 'create()', function() {
+		
+		it( "should create a new class", function() {
+			var constructorCalled = false,
+			    methodCalled = false;
+			
+			var MyClass = Class.create( {
+				constructor : function() { constructorCalled = true; },
+				method : function() { methodCalled = true; }
+			} );
+			
+			var instance = new MyClass();
+			expect( constructorCalled ).toBe( true );  // orig YUI Test err msg: "The constructor should have been called by instantiating the class"
+			expect( instance.method ).toBe( MyClass.prototype.method );  // orig YUI Test err msg: "The method should exist on the prototype"
+			
+			instance.method();
+			expect( methodCalled ).toBe( true );  // orig YUI Test err msg: "The method should have been called from the prototype"
+		} );
+		
+	} );
+	
+	
+	describe( 'extend()', function() {
 		
 		describe( "Test basic extend() functionality (prototype inheritance, constructor reference fixing, superclass reference", function() {
 			
 			it( "extend() should set up prototype-chained inheritance", function() {
-				var Animal = Class.extend( Object, {
+				var Animal = Class.create( {
 					constructor: function( name ) {
 						this._name = name;
 					},
@@ -197,7 +190,7 @@ describe( "Class", function() {
 			
 			
 			it( "extend() should fix the constructor property on the prototype to point back to its actual constructor, when no user-defined constructor is declared", function() {
-				var MyClass = new Class( {} );
+				var MyClass = Class.create( {} );
 				var MySubClass = MyClass.extend( {} );
 				
 				var myClassInstance = new MyClass();
@@ -209,7 +202,7 @@ describe( "Class", function() {
 			
 			
 			it( "extend() should fix the constructor property on the prototype to point back to its actual constructor, when a user-defined constructor is declared", function() {
-				var MyClass = new Class( { constructor: function(){} } );
+				var MyClass = Class.create( { constructor: function(){} } );
 				var MySubClass = MyClass.extend( { constructor: function(){} } );
 				
 				var myClassInstance = new MyClass();
@@ -500,13 +493,13 @@ describe( "Class", function() {
 			
 			
 			it( "extend() should *not* wrap the constructor function of another class with the _super() calling method", function() {
-				var InnerClass = new Class( {
+				var InnerClass = Class.create( {
 					constructor : function() {
 						this._super();   // This constructor calls this._super(), but we won't want it wrapped with the this._super() calling function from OuterClass
 					}
 				} );
 				
-				var OuterSuperClass = new Class( {  // a superclass, because 'innerClass' will only be wrapped if the superclass has a property with the same name, and is also a function
+				var OuterSuperClass = Class.create( {  // a superclass, because 'innerClass' will only be wrapped if the superclass has a property with the same name, and is also a function
 					innerClass : function() {}
 				} );
 				var OuterSubClass = OuterSuperClass.extend( {
@@ -525,7 +518,7 @@ describe( "Class", function() {
 				};
 				InnerClass.__Class = true;  // the flag we're using to determine if a constructor function is a class. No other way to determine...  This is set when the class is created.
 				
-				var OuterSuperClass = new Class( {  // a superclass, because 'innerClass' will only be wrapped if the superclass has a property with the same name, and is also a function
+				var OuterSuperClass = Class.create( {  // a superclass, because 'innerClass' will only be wrapped if the superclass has a property with the same name, and is also a function
 					innerClass : function() {}
 				} );
 				var OuterSubClass = OuterSuperClass.extend( {
@@ -569,7 +562,7 @@ describe( "Class", function() {
 			it( "The static methods defined in `statics` should have their `this` reference set to their class when executed", function() {
 				var thisReference;
 				
-				var MyClass = new Class( {
+				var MyClass = Class.create( {
 					statics : {
 						staticMethod : function() {
 							thisReference = this;
@@ -680,7 +673,7 @@ describe( "Class", function() {
 			it( "The static methods defined in `inheritedStatics` should have their `this` reference set to their class when executed", function() {
 				var thisReference;
 				
-				var MyClass = new Class( {
+				var MyClass = Class.create( {
 					inheritedStatics : {
 						staticMethod : function() {
 							thisReference = this;
@@ -801,7 +794,7 @@ describe( "Class", function() {
 			
 			it( "A class created with `abstractClass: true` should not be able to be instantiated when declared with no constructor", function() {
 				expect( function() {
-					var AbstractClass = new Class( {
+					var AbstractClass = Class.create( {
 						abstractClass: true
 					} );
 					
@@ -813,7 +806,7 @@ describe( "Class", function() {
 			
 			it( "A class created with `abstractClass: true` should not be able to be instantiated when declared with its own constructor", function() {
 				expect( function() {
-					var AbstractClass = new Class( {
+					var AbstractClass = Class.create( {
 						abstractClass: true,
 						
 						// Declare own constructor
@@ -827,7 +820,7 @@ describe( "Class", function() {
 			
 			
 			it( "A subclass of an abstract class (which doesn't define its own constructor) should be able to be instantiated", function() {
-				var AbstractClass = new Class( {
+				var AbstractClass = Class.create( {
 					abstractClass: true
 				} );
 				var ConcreteClass = AbstractClass.extend( {
@@ -841,7 +834,7 @@ describe( "Class", function() {
 			it( "A subclass of an abstract class (which *does* define its own constructor) should be able to be instantiated", function() {
 				var abstractClassConstructorCallCount = 0;
 				
-				var AbstractClass = new Class( {
+				var AbstractClass = Class.create( {
 					abstractClass: true,
 					
 					constructor : function() {
@@ -860,7 +853,7 @@ describe( "Class", function() {
 			it( "An abstract class's constructor should be able to be executed from the concrete class", function() {
 				var abstractClassConstructorCallCount = 0;
 				
-				var AbstractClass = new Class( {
+				var AbstractClass = Class.create( {
 					abstractClass : true,
 					
 					constructor : function() {
@@ -881,7 +874,7 @@ describe( "Class", function() {
 			
 			it( "extend() should throw an error for a class with abstract methods that is not declared with abstractClass: true", function() {
 				expect( function() {
-					var ConcreteClass = new Class( {
+					var ConcreteClass = Class.create( {
 						concreteMethod : function() {},
 						abstractMethod : Class.abstractMethod
 					} );
@@ -893,7 +886,7 @@ describe( "Class", function() {
 			
 			it( "extend() should throw an error if a concrete class does not implement all abstract methods from its superclass", function() {
 				expect( function() {
-					var AbstractClass = new Class( {
+					var AbstractClass = Class.create( {
 						abstractClass : true,
 						
 						concreteMethod : function() {},
@@ -912,7 +905,7 @@ describe( "Class", function() {
 			
 			
 			it( "extend() should allow a properly defined abstract class with abstract methods, and a concrete class with the abstract methods implemented", function() {
-				var AbstractClass = new Class( {
+				var AbstractClass = Class.create( {
 					abstractClass : true,
 					
 					concreteMethod : function() {},
@@ -931,7 +924,7 @@ describe( "Class", function() {
 			
 			
 			it( "extend() should allow a hierarchy of properly defined abstract classes with abstract methods, and a concrete class with the abstract methods implemented", function() {
-				var AbstractClass = new Class( {
+				var AbstractClass = Class.create( {
 					abstractClass : true,
 					
 					concreteMethod : function() {},
@@ -964,11 +957,11 @@ describe( "Class", function() {
 			it( "onClassExtended(), if it exists as a static, should be executed after all other extend functionality has completed", function() {
 				var onClassExtendedCallCount = 0;
 				
-				var MyMixin = new Class( {
+				var MyMixin = Class.create( {
 					mixinInstanceMethod : function() {}
 				} );
 				
-				var MyClass = new Class( {
+				var MyClass = Class.create( {
 					statics : {
 						onClassExtended : function( newClass ) {
 							onClassExtendedCallCount++;
@@ -998,7 +991,7 @@ describe( "Class", function() {
 				var onClassExtendedCallCount = 0,
 				    currentClassPassedIn;
 				
-				var MyClass = new Class( {
+				var MyClass = Class.create( {
 					inheritedStatics : {
 						onClassExtended : function( newClass ) {
 							onClassExtendedCallCount++;
@@ -1144,7 +1137,7 @@ describe( "Class", function() {
 		beforeEach( function() {
 			thisSuite = {};
 			
-			thisSuite.Superclass = new Class( {} );
+			thisSuite.Superclass = Class.create( {} );
 			thisSuite.Subclass = thisSuite.Superclass.extend( {} );
 			thisSuite.SubSubclass = thisSuite.Subclass.extend( {} );
 		} );
