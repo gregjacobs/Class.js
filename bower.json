@@ -6,7 +6,7 @@
   "authors": [
     "Gregory Jacobs <greg@greg-jacobs.com>"
   ],
-  "description": "Simple utility to allow the easy use of OOP in JS. Includes inheritance, mixins, abstract classes, inherited statics, and more.",
+  "description": "Utility to allow the easy use of OOP in JS. Includes inheritance, mixins, abstract classes, inherited statics, and more.",
   "keywords": [
     "OOP",
     "class",
