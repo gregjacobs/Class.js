@@ -1,6 +1,6 @@
 /*!
  * Class.js
- * Version 0.3.3
+ * Version 0.5.0
  *
  * Copyright(c) 2013 Gregory Jacobs.
  * MIT Licensed. http://www.opensource.org/licenses/mit-license.php
