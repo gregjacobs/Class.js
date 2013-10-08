@@ -696,6 +696,21 @@ alert( MySubClass.uniqueId );  // alerts: 2
 
 
 
+## Usage from Node.js
+
+Unfortunately, the "class-js" package name was taken, so I made it "class-js2"
+
+```
+npm install class-js2 --save
+```
+
+```javascript
+var Class = require( 'class-js2' );
+
+var HelloWorld = Class.create( ... );
+//...
+```
+
 
 ## Changelog:
 
