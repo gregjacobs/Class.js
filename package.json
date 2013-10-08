@@ -1,10 +1,13 @@
 {
-  "name": "Class.js",
-  "description": "",
+  "name": "Class-js",
+  "description": "Simple and powerful class utility to allow the easy use of OOP in JS. Includes inheritance, mixins, abstract classes, inherited statics, and more.",
   "version": "0.5.0",
+  "license": "MIT",
   "homepage": "https://www.class-js.com",
   "author": {
-    "name": "Gregory Jacobs"
+    "name": "Gregory Jacobs",
+    "email": "greg@greg-jacobs.com",
+    "url": "http://greg-jacobs.com"
   },
   "repository": {
     "type": "git",
@@ -13,9 +16,12 @@
   "bugs": {
     "url": "https://github.com/gregjacobs/Class.js/issues"
   },
-  "main": "Gruntfile.js",
+  "files" : [
+  	"dist"
+  ],
+  "main": "./dist/Class.js",
   "engines": {
-    "node": ">= 0.8.0"
+    "node": "*"
   },
   "devDependencies": {
     "grunt": "~0.4.1",
@@ -24,6 +30,6 @@
     "grunt-contrib-uglify": "~0.2.0"
   },
   "keywords": [
-    "class", "class.js", "oop", "object", "inheritance", "mixin", "static", "prototype", "abstract", "superclass", "subclass"
+    "class", "class.js", "class-js", "oop", "object", "inheritance", "mixin", "static", "prototype", "abstract", "superclass", "subclass"
   ]
 }
