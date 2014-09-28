@@ -1,6 +1,6 @@
 /*!
  * Class.js
- * Version 0.5.0
+ * Version 0.5.2
  *
  * Copyright(c) 2013 Gregory Jacobs.
  * MIT Licensed. http://www.opensource.org/licenses/mit-license.php
@@ -79,7 +79,7 @@
 
 // Initialization handles the availability of an AMD loader (like require.js, which has function `define()`).
 // If no AMD loader, injects browser global `Class`
-(function( root, factory ) {
+;(function( root, factory ) {
 	if( typeof exports === 'object' ) {
 		module.exports = factory();  // NodeJS
 	} else if( typeof define === 'function' && define.amd ) {

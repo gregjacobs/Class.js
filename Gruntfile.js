@@ -21,7 +21,7 @@ module.exports = function( grunt ) {
 	
 	var banner = [
 		'/*!',
-		' * <%= pkg.name %>',
+		' * Class.js',
 		' * Version <%= pkg.version %>',
 		' *',
 		' * Copyright(c) 2013 Gregory Jacobs.',

@@ -1,7 +1,7 @@
 {
   "name": "class-js2",
   "description": "Simple and powerful class utility to allow the easy use of OOP in JS. Includes inheritance, mixins, abstract classes, inherited statics, and more.",
-  "version": "0.5.0",
+  "version": "0.5.2",
   "license": "MIT",
   "homepage": "https://www.class-js.com",
   "author": {
