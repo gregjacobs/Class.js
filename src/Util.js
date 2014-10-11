@@ -4,6 +4,7 @@
 //       so these are not global.
 
 /**
+ * @private
  * @class Class.Util
  * @singleton
  * 

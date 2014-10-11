@@ -413,7 +413,7 @@
 	
 	/**
 	 * @private
-	 * @class ClassBuilder
+	 * @class Class.ClassBuilder
 	 * @singleton
 	 * 
 	 * Performs the functionality of building a class. Used from {@link Class#extend}.
@@ -703,6 +703,7 @@
 	//       so these are not global.
 	
 	/**
+	 * @private
 	 * @class Class.Util
 	 * @singleton
 	 * 

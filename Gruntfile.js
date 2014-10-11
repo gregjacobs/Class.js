@@ -4,24 +4,24 @@ var execFile = require( 'child_process' ).execFile;
 
 module.exports = function( grunt ) {
 
-	// Register main tasks
+	// Register Tasks
 	grunt.registerTask( 'default', [ 'jshint', 'build', 'jasmine' ] );
 	grunt.registerTask( 'build', [ 'concat:development', 'uglify:production' ] );
-	grunt.registerTask( 'doc', "Builds the documentation.", [ 'jshint', 'build', 'compileDocs' ] );
+	grunt.registerTask( 'doc', "Builds the documentation.", [ 'jshint', 'build', 'jsduck' ] );
 	
 	
-	// Register sub-tasks. These aren't meant to be called directly, but are used as part of the main tasks.
-	grunt.registerTask( 'compileDocs', compileDocsTask );
+	// Plugins Configurations
+	grunt.loadNpmTasks( 'grunt-contrib-jshint' );
+	grunt.loadNpmTasks( 'grunt-contrib-jasmine' );
+	grunt.loadNpmTasks( 'grunt-contrib-concat' );
+	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
+	grunt.loadNpmTasks( 'grunt-jsduck' );
 	
-	
-	var banner = createBanner();
 	
 	// -----------------------------------
 	
-	// Plugin Configurations
 	
-	
-	// Project configuration
+	// Project Configuration
 	grunt.initConfig( {
 		pkg: grunt.file.readJSON( 'package.json' ),
 		
@@ -43,7 +43,7 @@ module.exports = function( grunt ) {
 		concat: {
 			'development' : {
 				options: {
-					banner : banner + createDistFileHeader(),
+					banner : createBanner() + createDistFileHeader(),
 					footer : createDistFileFooter(),
 					nonull : true,
 					
@@ -69,16 +69,22 @@ module.exports = function( grunt ) {
 					'dist/Class.min.js' : [ 'dist/Class.js' ]
 				}
 			}
+		},
+		
+		jsduck: {
+			main: {
+				src: [
+					'src/**/*.js'
+				],
+				dest: 'docs',  // output dir
+		
+				options: {
+					'title': 'Class.js API Docs'
+				}
+			}
 		}
 	} );
 
-	// These plugins provide the tasks.
-	grunt.loadNpmTasks( 'grunt-contrib-jshint' );
-	grunt.loadNpmTasks( 'grunt-contrib-jasmine' );
-	grunt.loadNpmTasks( 'grunt-contrib-concat' );
-	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
-
-	
 	
 	// -----------------------------------
 	
@@ -146,54 +152,6 @@ module.exports = function( grunt ) {
 		];
 		
 		return umdEnd.join( "\n" );
-	}
-	
-	
-	/**
-	 * Compiles the JavaScript documentation JSDuck, as part of the 'doc' task.
-	 * 
-	 * Unfortunately, we can't use the 'grunt-jsduck' plugin because installing the JSDuck gem on Windows
-	 * using `gem install` first involves a long set of installation steps to install the developer build 
-	 * tools needed to be able to compile the Ruby extensions needed by JSDuck's dependent libraries.
-	 * 
-	 * Hence, it is much easier for developers to get set up by not doing anything at all (i.e., simply
-	 * running the packaged JSDuck executable in the repository).
-	 */
-	function compileDocsTask() {
-		var done = this.async();
-		
-		var executable = 'vendor/jsduck/jsduck-4.4.1.exe';
-		var args = [
-			'--output=docs',
-			'--title=Class.js API Docs',
-			
-			'src/'
-		];
-		
-		execFile( executable, args, function( err, stdout, stderr ) {
-			if( stdout ) console.log( stdout );
-			if( stderr ) console.log( stderr );
-			
-			if( err ) {
-				// JSDuck command itself failed
-				grunt.log.error( "Documentation generation failed: " + err );
-				
-				done( false );
-				return;
-			}
-			
-			if( stdout || stderr ) {
-				// JSDuck produced errors/warnings
-				grunt.log.error( "Documentation generation produced warnings/errors. Please fix them, and try again." );
-				
-				done( false );
-				return;
-			}
-			
-			grunt.log.writeln( "Documentation generated successfully." );
-			grunt.log.writeln( "To publish the docs on github, copy the /docs folder into a checkout of the gh-pages branch, commit, and push that branch." );
-			done();
-		} );
 	}
 	
 };

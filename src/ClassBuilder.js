@@ -14,7 +14,7 @@ var inlineOverride = function( obj ) {
 
 /**
  * @private
- * @class ClassBuilder
+ * @class Class.ClassBuilder
  * @singleton
  * 
  * Performs the functionality of building a class. Used from {@link Class#extend}.
