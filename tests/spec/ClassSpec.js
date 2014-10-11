@@ -440,16 +440,16 @@ describe( "Class", function() {
 				
 				try {
 					instance.myMethod();  // this line should cause an error to be thrown
-					expect( true ).toBe( false );  // orig YUI Test err msg: "The test should have errored, with '_super' is not a function"
+					expect( "an error" ).toBe( "thrown" );
 					
 				} catch( ex ) {
 					// Since different browsers throw the error differently, check if the string "_super" is in the error message.
 					// If it's not, there might be a different error message
 					if( !/\b_super\b/.test( ex.message ) && 
-					    !/'undefined' is not a function/.test( ex.message ) && 
+					    !/'?undefined'? is not a function/.test( ex.message ) && 
 					    !/object doesn't support this property or method/i.test( ex.message ) 
 					) {
-						expect( true ).toBe( false );  // orig YUI Test err msg: "The test threw an error that didn't have to do with the _super() method. The error message is: " + ex.message
+						expect( ex.message ).toBe( "one of the messages tested for in the above if block" );
 					}
 				}
 			} );
@@ -476,17 +476,17 @@ describe( "Class", function() {
 				
 				try {
 					instance.myMethod();  // this line should cause an error to be thrown
-					expect( true ).toBe( false );  // orig YUI Test err msg: "The test should have errored, with '_super' is not a function"
+					expect( "an error" ).toBe( "thrown" );
 					
 				} catch( ex ) {
 					// Since different browsers throw the error differently, check if the string "_super" or "parentMethod" (the var that is used) is in 
 					// the error message. If it's not, there might be a different error message
 					if( !/\bparentMethod\b/.test( ex.message ) && 
-					    !/'undefined' is not a function/.test( ex.message ) && 
+					    !/'?undefined'? is not a function/.test( ex.message ) && 
 					    !/\b_super\b/.test( ex.message ) && 
 					    !/object doesn't support this property or method/i.test( ex.message )
 					) {
-						expect( true ).toBe( false );  // orig YUI Test err msg: "The test threw an error that didn't have to do with the _super() method. The error message is: " + ex.message
+						expect( ex.message ).toBe( "one of the messages tested for in the above if block" );
 					}
 				}
 			} );
