@@ -1,28 +1,28 @@
 /*!
- * class-js2
- * Version 0.5.2
+ * Class.js
+ * Version 0.6.0
  *
- * Copyright(c) 2013 Gregory Jacobs.
+ * Copyright(c) 2014 Gregory Jacobs <greg@greg-jacobs.com>
  * MIT Licensed. http://www.opensource.org/licenses/mit-license.php
  *
- * https://www.class-js.com
+ * http://www.class-js.com
  */
-/*global window, module, define */
-/*jslint forin:true */
-
-// Initialization handles the availability of an AMD loader (like require.js, which has function `define()`).
-// If no AMD loader, injects browser global `Class`
-;(function( root, factory ) {
-	if( typeof exports === 'object' ) {
-		module.exports = factory();  // NodeJS
-	} else if( typeof define === 'function' && define.amd ) {
-		define( factory );           // Handle availability of AMD loader
+;( function( root, factory ) {
+	if( typeof define === 'function' && define.amd ) {
+		define( factory );             // Define as AMD module if an AMD loader is present (ex: RequireJS).
+	} else if( typeof exports !== 'undefined' ) {
+		module.exports = factory();    // Define as CommonJS module for Node.js, if available.
 	} else {
-		root.Class = factory();      // Browser global (root == window)
+		root.Class = factory();        // Finally, define as a browser global if no module loader.
 	}
 }( this, function() {
+
+	/*global window */
 	
-	// Utility functions / variables	
+	// Utility functions / variables. 
+	
+	// NOTE: This entire source file is wrapped in a UMD block / factory function when built, 
+	//       so these are not global.
 	
 	/**
 	 * Determines if a value is an object.
@@ -386,6 +386,11 @@
 		},
 		
 		
+		/**
+		 * @private
+		 * @param {Function} superclass
+		 * @param {Object} overrides
+		 */
 		createConstructor : function( superclass, overrides ) {
 			var subclassCtorImplFn;
 			
@@ -400,6 +405,11 @@
 		},
 		
 		
+		/**
+		 * @private
+		 * @param {Function} superclass
+		 * @param {Function} subclass
+		 */
 		createPrototypeChain : function( superclass, subclass ) {
 			var superclassPrototype = superclass.prototype,
 			    subclassPrototype = subclass.prototype;
@@ -413,7 +423,10 @@
 		},
 		
 		
-		
+		/**
+		 * @private
+		 * @param {Function} subclass
+		 */
 		checkAbstractMethodsImplemented : function( subclass ) {
 			var subclassPrototype = subclass.prototype;
 			
@@ -429,6 +442,11 @@
 		},
 		
 		
+		/**
+		 * @private
+		 * @param {Function} superclass
+		 * @param {Object} overrides
+		 */
 		wrapSuperclassCallingMethods : function( superclass, overrides ) {
 			var superclassPrototype = superclass.prototype;
 			
@@ -460,6 +478,10 @@
 		},
 		
 		
+		/**
+		 * @private
+		 * @param {Function} subclass
+		 */
 		attachCommonSubclassStatics : function( subclass ) {
 			// Attach new static methods to the subclass
 			subclass.override = function( overrides ) { Class.override( subclass, overrides ); };
@@ -468,7 +490,13 @@
 		},
 		
 		
-		// Attach new instance methods to the subclass
+		/**
+		 * Attach new instance methods to the subclass
+		 * 
+		 * @private
+		 * @param {Function} superclass
+		 * @param {Function} subclass
+		 */
 		attachCommonSubclassInstanceMethods : function( superclass, subclass ) {
 			var subclassPrototype = subclass.prototype;
 			subclassPrototype.superclass = subclassPrototype.supr = function() { return superclass.prototype; };
@@ -477,7 +505,14 @@
 		},
 		
 		
-		// A function which wraps methods of the new subclass that can call their superclass method
+		/**
+		 * Creates a function that wraps methods of the new subclass that can call their superclass method.
+		 * 
+		 * @private
+		 * @param {Function} superclass
+		 * @param {String} fnName
+		 * @param {Function} fn
+		 */
 		createSuperclassCallingMethod : function( superclass, fnName, fn ) {
 			var superclassPrototype = superclass.prototype;
 			
@@ -500,6 +535,12 @@
 			};
 		},
 		
+		
+		/**
+		 * @private
+		 * @param {Function} subclass
+		 * @param {Function[]} mixins
+		 */
 		applyMixins : function( subclass, mixins ) {
 			var subclassPrototype = subclass.prototype;
 			
@@ -673,7 +714,7 @@
 		}
 		
 	};
-	
+
 	return Class;
-	
+
 } ) );

@@ -1,9 +1,9 @@
 {
   "name": "class-js2",
   "description": "Simple and powerful class utility to allow the easy use of OOP in JS. Includes inheritance, mixins, abstract classes, inherited statics, and more.",
-  "version": "0.5.2",
-  "license": "MIT",
-  "homepage": "https://www.class-js.com",
+  "version": "0.6.0",
+  "license": "MIT Licensed. http://www.opensource.org/licenses/mit-license.php",
+  "homepage": "http://www.class-js.com",
   "author": {
     "name": "Gregory Jacobs",
     "email": "greg@greg-jacobs.com",
@@ -16,20 +16,32 @@
   "bugs": {
     "url": "https://github.com/gregjacobs/Class.js/issues"
   },
-  "files" : [
-  	"dist"
+  "files": [
+    "dist"
   ],
   "main": "./dist/Class.js",
   "engines": {
     "node": "*"
   },
   "devDependencies": {
-    "grunt": "~0.4.1",
-    "grunt-contrib-jshint": "~0.1.1",
-    "grunt-contrib-concat": "~0.2.0",
-    "grunt-contrib-uglify": "~0.2.0"
+    "grunt": "^0.4.5",
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-contrib-concat": "^0.4.0",
+    "grunt-contrib-uglify": "^0.4.0",
+    "grunt-contrib-jasmine": "^0.8.0"
   },
   "keywords": [
-    "class", "class.js", "class-js", "oop", "object", "inheritance", "mixin", "static", "prototype", "abstract", "superclass", "subclass"
+    "class",
+    "class.js",
+    "class-js",
+    "oop",
+    "object",
+    "inheritance",
+    "mixin",
+    "static",
+    "prototype",
+    "abstract",
+    "superclass",
+    "subclass"
   ]
 }

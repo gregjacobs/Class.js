@@ -1,5 +1,4 @@
-/*global jQuery, Class, _, describe, beforeEach, afterEach, it, expect */
-/*jslint evil:true */
+/*global Class, describe, beforeEach, afterEach, it, expect */
 describe( "Class", function() {
 	
 	describe( 'assign() utility method', function() {
@@ -143,16 +142,18 @@ describe( "Class", function() {
 				var MySubClass = MyClass.extend( {} );
 				var instance = new MySubClass();
 				
-				expect( _.isFunction( instance.method ) ).toBe( true );  // orig YUI Test err msg: "The method should have been inherited to the subclass with the static `extend()` method placed on the superclass constructor"
+				expect( typeof instance.method ).toBe( 'function' );  // orig YUI Test err msg: "The method should have been inherited to the subclass with the static `extend()` method placed on the superclass constructor"
 			} );
 			
 			
 			it( "should allow the constructor of a class that extends from Object to call its superclass constructor", function() {
-				var MyClass = Class.extend( Object, {
-					constructor : function() {
-						this._super();
-					}
-				} );
+				expect( function() {
+					var MyClass = Class.extend( Object, {
+						constructor : function() {
+							this._super();
+						}
+					} );
+				} ).not.toThrow();
 			} );
 			
 			
@@ -296,9 +297,10 @@ describe( "Class", function() {
 						this._super();
 					}
 				} );
-				var instance = new A();
 				
-				// This test should simply not error. this._super() should be defined, and be able to be called just fine
+				expect( function() {
+					var instance = new A();
+				} ).not.toThrow();
 			} );
 			
 			
@@ -438,20 +440,9 @@ describe( "Class", function() {
 				
 				var instance = new B();
 				
-				try {
-					instance.myMethod();  // this line should cause an error to be thrown
-					expect( "an error" ).toBe( "thrown" );
-					
-				} catch( ex ) {
-					// Since different browsers throw the error differently, check if the string "_super" is in the error message.
-					// If it's not, there might be a different error message
-					if( !/\b_super\b/.test( ex.message ) && 
-					    !/'?undefined'? is not a function/.test( ex.message ) && 
-					    !/object doesn't support this property or method/i.test( ex.message ) 
-					) {
-						expect( ex.message ).toBe( "one of the messages tested for in the above if block" );
-					}
-				}
+				expect( function() {
+					instance.myMethod();
+				} ).toThrowError( /\b_super\b|'?undefined'? is not a function|object doesn't support this property or method/ );
 			} );
 			
 			
@@ -474,21 +465,9 @@ describe( "Class", function() {
 				
 				var instance = new B();
 				
-				try {
-					instance.myMethod();  // this line should cause an error to be thrown
-					expect( "an error" ).toBe( "thrown" );
-					
-				} catch( ex ) {
-					// Since different browsers throw the error differently, check if the string "_super" or "parentMethod" (the var that is used) is in 
-					// the error message. If it's not, there might be a different error message
-					if( !/\bparentMethod\b/.test( ex.message ) && 
-					    !/'?undefined'? is not a function/.test( ex.message ) && 
-					    !/\b_super\b/.test( ex.message ) && 
-					    !/object doesn't support this property or method/i.test( ex.message )
-					) {
-						expect( ex.message ).toBe( "one of the messages tested for in the above if block" );
-					}
-				}
+				expect( function() {
+					instance.myMethod();
+				} ).toThrowError( /\b_super\b|'?undefined'? is not a function|object doesn't support this property or method/ );
 			} );
 			
 			
@@ -541,8 +520,8 @@ describe( "Class", function() {
 					}
 				} );
 				
-				expect( _.isFunction( MyClass.staticFn1 ) ).toBe( true );
-				expect( _.isFunction( MyClass.staticFn2 ) ).toBe( true );
+				expect( typeof MyClass.staticFn1 ).toBe( 'function' );
+				expect( typeof MyClass.staticFn2 ).toBe( 'function' );
 			} );
 			
 			
@@ -554,7 +533,7 @@ describe( "Class", function() {
 				} );
 				var MySubClass = MyClass.extend( {} );
 				
-				expect( _.isFunction( MyClass.staticFn ) ).toBe( true );
+				expect( typeof MyClass.staticFn ).toBe( 'function' );
 				expect( MySubClass.staticFn ).toBeUndefined();
 			} );
 			
@@ -589,8 +568,8 @@ describe( "Class", function() {
 					}
 				} );
 				
-				expect( _.isFunction( MyClass.staticFn1 ) ).toBe( true );
-				expect( _.isFunction( MyClass.staticFn2 ) ).toBe( true );
+				expect( typeof MyClass.staticFn1 ).toBe( 'function' );
+				expect( typeof MyClass.staticFn2 ).toBe( 'function' );
 			} );
 			
 			
@@ -604,10 +583,10 @@ describe( "Class", function() {
 				var MySubSubClass = MySubClass.extend( {} );
 				var MySubSubSubClass = MySubSubClass.extend( {} );
 				
-				expect( _.isFunction( MyClass.staticFn ) ).toBe( true );  // orig YUI Test err msg: "The staticFn should exist on the class it was defined on with `inheritedStatics`"
-				expect( _.isFunction( MySubClass.staticFn ) ).toBe( true );  // orig YUI Test err msg: "The staticFn should exist on a direct subclass"
-				expect( _.isFunction( MySubSubClass.staticFn ) ).toBe( true );  // orig YUI Test err msg: "The staticFn should exist on a subclass 2 subclasses down from the class that defined it"
-				expect( _.isFunction( MySubSubSubClass.staticFn ) ).toBe( true );  // orig YUI Test err msg: "The staticFn should exist on a subclass 3 subclasses down from the class that defined it"
+				expect( typeof MyClass.staticFn ).toBe( 'function' );  // orig YUI Test err msg: "The staticFn should exist on the class it was defined on with `inheritedStatics`"
+				expect( typeof MySubClass.staticFn ).toBe( 'function' );  // orig YUI Test err msg: "The staticFn should exist on a direct subclass"
+				expect( typeof MySubSubClass.staticFn ).toBe( 'function' );  // orig YUI Test err msg: "The staticFn should exist on a subclass 2 subclasses down from the class that defined it"
+				expect( typeof MySubSubSubClass.staticFn ).toBe( 'function' );  // orig YUI Test err msg: "The staticFn should exist on a subclass 3 subclasses down from the class that defined it"
 			} );
 			
 			
@@ -623,8 +602,8 @@ describe( "Class", function() {
 				
 				expect( MyClass.staticFn ).toBeUndefined();  // orig YUI Test err msg: "The staticFn should not exist on a far superclass that has a subclass with `inheritableStatics`"
 				expect( MySubClass.staticFn ).toBeUndefined();  // orig YUI Test err msg: "The staticFn should not exist on a direct superclass of a subclass with `inheritableStatics`"
-				expect( _.isFunction( MySubSubClass.staticFn ) ).toBe( true );  // orig YUI Test err msg: "The staticFn should exist on the subclass that `inheritableStatics` was defined on"
-				expect( _.isFunction( MySubSubSubClass.staticFn ) ).toBe( true );  // orig YUI Test err msg: "The staticFn should exist on a subclass of the class that defined `inheritableStatics`"
+				expect( typeof MySubSubClass.staticFn ).toBe( 'function' );  // orig YUI Test err msg: "The staticFn should exist on the subclass that `inheritableStatics` was defined on"
+				expect( typeof MySubSubSubClass.staticFn ).toBe( 'function' );  // orig YUI Test err msg: "The staticFn should exist on a subclass of the class that defined `inheritableStatics`"
 			} );
 			
 			
@@ -800,7 +779,7 @@ describe( "Class", function() {
 					
 					var instance = new AbstractClass();
 					expect( true ).toBe( false );  // orig YUI Test err msg: "The test should have thrown an error when attempting to instantiate an abstract class"
-				} ).toThrow( "Error: Cannot instantiate abstract class" );
+				} ).toThrow( new Error( "Error: Cannot instantiate abstract class" ) );
 			} );
 			
 			
@@ -815,7 +794,7 @@ describe( "Class", function() {
 					
 					var instance = new AbstractClass();
 					expect( true ).toBe( false );  // orig YUI Test err msg: "The test should have thrown an error when attempting to instantiate an abstract class"
-				} ).toThrow( "Error: Cannot instantiate abstract class" );
+				} ).toThrow( new Error( "Error: Cannot instantiate abstract class" ) );
 			} );
 			
 			
@@ -827,7 +806,9 @@ describe( "Class", function() {
 					
 				} );
 				
-				var instance = new ConcreteClass();
+				expect( function() {
+					var instance = new ConcreteClass();
+				} ).not.toThrow();
 			} );
 			
 			
@@ -880,7 +861,7 @@ describe( "Class", function() {
 					} );
 					
 					expect( true ).toBe( false );  // orig YUI Test err msg: "Test should have thrown an error for a concrete class with an abstract method"
-				} ).toThrow( "The class being created has abstract method 'abstractMethod', but is not declared with 'abstractClass: true'" );
+				} ).toThrow( new Error( "The class being created has abstract method 'abstractMethod', but is not declared with 'abstractClass: true'" ) );
 			} );
 			
 			
@@ -900,7 +881,7 @@ describe( "Class", function() {
 					} );
 					
 					expect( true ).toBe( false );  // orig YUI Test err msg: "Test should have thrown an error for a concrete class with an abstract method (abstractMethod2 not implemented)"
-				} ).toThrow( "The concrete subclass being created must implement abstract method: 'abstractMethod2', or be declared abstract as well (using 'abstractClass: true')" );
+				} ).toThrow( new Error( "The concrete subclass being created must implement abstract method: 'abstractMethod2', or be declared abstract as well (using 'abstractClass: true')" ) );
 			} );
 			
 			
@@ -913,13 +894,13 @@ describe( "Class", function() {
 					abstractMethod2 : Class.abstractMethod
 				} );
 				
-				var ConcreteClass = AbstractClass.extend( {
-					// Implement both of the abstract methods
-					abstractMethod1 : function(){},
-					abstractMethod2 : function(){}
-				} );
-				
-				// This test should simply not error -- both abstract methods have been implemented by ConcreteClass
+				expect( function() {
+					var ConcreteClass = AbstractClass.extend( {
+						// Implement both of the abstract methods
+						abstractMethod1 : function(){},
+						abstractMethod2 : function(){}
+					} );
+				} ).not.toThrow();  // The above should simply not error -- both abstract methods have been implemented by ConcreteClass 
 			} );
 			
 			
@@ -941,12 +922,12 @@ describe( "Class", function() {
 					abstractMethod1 : function() {}
 				} );
 				
-				var ConcreteClass = AbstractSubclass.extend( {
-					// Implement the other abstract method
-					abstractMethod2 : function(){}
-				} );
-				
-				// This test should simply not error -- abstractMethod1 implemented by AbstractSubclass, and abstractMethod2 implemented by ConcreteClass
+				expect( function() {
+					var ConcreteClass = AbstractSubclass.extend( {
+						// Implement the other abstract method
+						abstractMethod2 : function(){}
+					} );
+				} ).not.toThrow();  // This test should simply not error -- abstractMethod1 implemented by AbstractSubclass, and abstractMethod2 implemented by ConcreteClass
 			} );
 			
 		} );
@@ -967,9 +948,9 @@ describe( "Class", function() {
 							onClassCreateCallCount++;
 							
 							// ASSERTS CONTINUE HERE
-							expect( _.isFunction( newClass.someStaticMethod ) ).toBe( true );  // orig YUI Test err msg: "someStaticMethod should exist as a static method by this point"
-							expect( _.isFunction( newClass.someInheritedStaticMethod ) ).toBe( true );  // orig YUI Test err msg: "someInheritedStaticMethod should exist as a static method by this point"
-							expect( _.isFunction( newClass.prototype.mixinInstanceMethod ) ).toBe( true );  // orig YUI Test err msg: "mixinInstanceMethod should exist as an instance method by this point"
+							expect( typeof newClass.someStaticMethod ).toBe( 'function' );  // orig YUI Test err msg: "someStaticMethod should exist as a static method by this point"
+							expect( typeof newClass.someInheritedStaticMethod ).toBe( 'function' );  // orig YUI Test err msg: "someInheritedStaticMethod should exist as a static method by this point"
+							expect( typeof newClass.prototype.mixinInstanceMethod ).toBe( 'function' );  // orig YUI Test err msg: "mixinInstanceMethod should exist as an instance method by this point"
 							expect( this ).toBe( newClass );  // should be called in the scope of the class too
 						},
 						
@@ -1315,7 +1296,7 @@ describe( "Class", function() {
 			
 			// Now call the hasMixin() function, and check for the classId
 			Class.hasMixin( MyClass, MyMixinClass );
-			expect( _.isNumber( MyMixinClass.__Class_classId ) ).toBe( true );  // orig YUI Test err msg: "MyClass should now have a numeric __Class_classId"
+			expect( typeof MyMixinClass.__Class_classId ).toBe( 'number' );  // orig YUI Test err msg: "MyClass should now have a numeric __Class_classId"
 		} );
 		
 		
@@ -1334,7 +1315,8 @@ describe( "Class", function() {
 			// Now call the hasMixin() function, and check for the hasMixinCache
 			Class.hasMixin( MyClass, MyMixinClass );
 			var hasMixinCache = MyClass.__Class_hasMixinCache;
-			expect( _.isObject( hasMixinCache ) ).toBe( true );  // orig YUI Test err msg: "MyClass should now have a hasMixinCache"
+			expect( hasMixinCache ).toBeTruthy();
+			expect( typeof hasMixinCache ).toBe( 'object' );  // MyClass should now have a hasMixinCache
 			
 			// Now call the hasMixin() function again, and check that it still has the same hasMixinCache
 			Class.hasMixin( MyClass, MyMixinClass );

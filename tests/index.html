@@ -1,35 +1,20 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-  "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
 <head>
   <title>Class.js Tests</title>
 
-  <link rel="stylesheet" type="text/css" href="../bower_components/jasmine/lib/jasmine-core/jasmine.css">
-  <script type="text/javascript" src="../bower_components/jasmine/lib/jasmine-core/jasmine.js"></script>
-  <script type="text/javascript" src="../bower_components/jasmine/lib/jasmine-core/jasmine-html.js"></script>
-  
-  <script type="text/javascript" src="../bower_components/lodash/dist/lodash.compat.js"></script>
-  
+  <!-- Jasmine -->
+  <link rel="shortcut icon" type="image/png" href="../node_modules/grunt-contrib-jasmine/vendor/jasmine-2.0.1/jasmine_favicon.png">
+	<link rel="stylesheet" type="text/css" href="../node_modules/grunt-contrib-jasmine/vendor/jasmine-2.0.1/jasmine.css">
+	<script src="../node_modules/grunt-contrib-jasmine/vendor/jasmine-2.0.1/jasmine.js"></script>
+	<script src="../node_modules/grunt-contrib-jasmine/vendor/jasmine-2.0.1/jasmine-html.js"></script>
+	<script src="../node_modules/grunt-contrib-jasmine/vendor/jasmine-2.0.1/boot.js"></script>
+	
+	<!-- Code Under Test -->
 	<script type="text/javascript" src="../src/Class.js"></script>
+	
+	<!-- Tests -->
 	<script type="text/javascript" src="spec/ClassSpec.js"></script>
-
-  <script type="text/javascript">
-    (function() {
-      var jasmineEnv = jasmine.getEnv();
-      jasmineEnv.updateInterval = 1000;
-
-      var htmlReporter = new jasmine.HtmlReporter();
-      jasmineEnv.addReporter(htmlReporter);
-      jasmineEnv.specFilter = function(spec) {
-        return htmlReporter.specFilter(spec);
-      };
-
-    	window.onload = function() {
-    		jasmineEnv.execute();
-    	};
-    })();
-  </script>
-
 </head>
 
 <body>

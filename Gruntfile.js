@@ -5,31 +5,20 @@ var execFile = require( 'child_process' ).execFile;
 module.exports = function( grunt ) {
 
 	// Register main tasks
-	grunt.registerTask( 'default', "Default task runs JSHint and then builds the project.", [ 'build' ] );
-	grunt.registerTask( 'build', "Builds the distribution JavaScript files (Class.js, and Class.min.js)",
-		[ 'jshint', 'concat:dist', 'uglify:dist' ] );
-	grunt.registerTask( 'doc', "Builds the JavaScript documentation.", [ 'build', 'compileDocs' ] );
+	grunt.registerTask( 'default', [ 'jshint', 'build', 'jasmine' ] );
+	grunt.registerTask( 'build', [ 'concat:development', 'uglify:production' ] );
+	grunt.registerTask( 'doc', "Builds the documentation.", [ 'build', 'compileDocs' ] );
 	
 	
 	// Register sub-tasks. These aren't meant to be called directly, but are used as part of the main tasks.
 	grunt.registerTask( 'compileDocs', compileDocsTask );
 	
 	
+	var banner = createBanner();
+	
 	// -----------------------------------
 	
 	// Plugin Configurations
-	
-	var banner = [
-		'/*!',
-		' * Class.js',
-		' * Version <%= pkg.version %>',
-		' *',
-		' * Copyright(c) 2013 Gregory Jacobs.',
-		' * MIT Licensed. http://www.opensource.org/licenses/mit-license.php',
-		' *',
-		' * <%= pkg.homepage %>',
-		' */\n'
-	].join( '\n' );
 	
 	
 	// Project configuration
@@ -37,29 +26,40 @@ module.exports = function( grunt ) {
 		pkg: grunt.file.readJSON( 'package.json' ),
 		
 		jshint: {
-			files: [ 'Gruntfile.js', 'src/**/*.js', 'tests/spec/**/*.js' ],
-			
-			options : {
-				'smarttabs' : true,
-				'undef'     : true,
-				'browser'   : true
+			files: {
+				src: [ 'Gruntfile.js', 'src/**/*.js', 'tests/spec/**/*.js' ]
 			}
 		},
 		
-		
-		concat : {
-			'dist' : {
-				options : {
-					banner: banner
+		jasmine: {
+			dist: {
+				options: {
+					specs: 'tests/**/*Spec.js'
 				},
-				src  : [ 'src/Class.js' ],  // simply adding the banner
-				dest : 'dist/Class.js'      // to the output file
+				src: 'dist/Class.min.js'  // test the minified file
 			}
 		},
 		
+		concat: {
+			'development' : {
+				options: {
+					banner : banner + createDistFileHeader(),
+					footer : createDistFileFooter(),
+					nonull : true,
+					
+					process : function( src, filepath ) {
+						return '\t' + src.replace( /\n/g, '\n\t' );  // indent each source file, which is placed inside the UMD block
+					}
+				},
+				src: [
+					'src/Class.js'
+				],
+				dest: 'dist/Class.js'
+			}
+		},
 		
 		uglify : {
-			'dist' : {
+			'production' : {
 				options: {
 					preserveComments : 'some'  // preserve license header comments
 				},
@@ -72,6 +72,7 @@ module.exports = function( grunt ) {
 
 	// These plugins provide the tasks.
 	grunt.loadNpmTasks( 'grunt-contrib-jshint' );
+	grunt.loadNpmTasks( 'grunt-contrib-jasmine' );
 	grunt.loadNpmTasks( 'grunt-contrib-concat' );
 	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
 
@@ -80,6 +81,70 @@ module.exports = function( grunt ) {
 	// -----------------------------------
 	
 	// Other Functions / Tasks
+	
+	
+	/**
+	 * Creates the banner comment with license header that is placed over the concatenated/minified files.
+	 * 
+	 * @private
+	 * @return {String}
+	 */
+	function createBanner() {
+		return [
+			'/*!',
+			' * Class.js',
+			' * Version <%= pkg.version %>',
+			' *',
+			' * Copyright(c) <%= grunt.template.today("yyyy") %> <%= pkg.author.name %> <<%= pkg.author.email %>>',
+			' * <%= pkg.license %>',
+			' *',
+			' * <%= pkg.homepage %>',
+			' */\n'
+		].join( "\n" );
+	}
+	
+	
+	/**
+	 * Creates the UMD (Universal Module Definition) header, which defines Class as one of the following when loaded:
+	 * 
+	 * 1. An AMD module, if an AMD loader is available (such as RequireJS)
+	 * 2. A CommonJS module, if a CommonJS module environment is available (such as Node.js), or
+	 * 3. A global variable, `Class`, if the others are unavailable.
+	 * 
+	 * This UMD header is combined with the UMD footer to create the distribution JavaScript file.
+	 * 
+	 * @private
+	 * @return {String}
+	 */
+	function createDistFileHeader() {
+		return [
+			";( function( root, factory ) {",  // note: prefixed ';' if Class.js is concatenated after a library that does not end in a ';' itself
+				"\tif( typeof define === 'function' && define.amd ) {",
+					"\t\tdefine( factory );             // Define as AMD module if an AMD loader is present (ex: RequireJS).",
+				"\t} else if( typeof exports !== 'undefined' ) {",
+					"\t\tmodule.exports = factory();    // Define as CommonJS module for Node.js, if available.",
+				"\t} else {",
+					"\t\troot.Class = factory();        // Finally, define as a browser global if no module loader.",
+				"\t}",
+			"}( this, function() {\n\n"
+		].join( "\n" );
+	}
+	
+	
+	/**
+	 * Creates the UMD (Universal Module Definition) footer. See {@link #createDistFileHeader} for details.
+	 * 
+	 * @private
+	 * @return {String}
+	 */
+	function createDistFileFooter() {
+		var umdEnd = [
+				'\n\n\treturn Class;\n',
+			'} ) );'
+		];
+		
+		return umdEnd.join( "\n" );
+	}
 	
 	
 	/**
