@@ -138,12 +138,26 @@
 		 *     var Animal = Class.create( {
 		 *         // class definition here
 		 *     } );
+		 *     
+		 * Example with `name` argument (see below):
 		 * 
+		 *     var Animal = Class.create( 'Animal', {
+		 *         // class definition here
+		 *     } );
+		 * 
+		 * @param {String} [name] A name for the class. It is recommended that you provide this, as this is set to the constructor's 
+		 *   `displayName` property to assist in debugging (esp. on Firefox), and is also used in error messages for subclasses 
+		 *   not implementing abstract methods, orphaned "override" methods, etc. 
 		 * @param {Object} classDefinition The class definition. See the `overrides` parameter of {@link #extend}.
 		 * @return {Function} The generated class (constructor function).
 		 */
-		create : function( classDefinition ) {
-			return Class.extend( Object, classDefinition );
+		create : function( name, classDefinition ) {
+			if( typeof name !== 'string' ) {
+				classDefinition = name;
+				name = "";
+			}
+			
+			return Class.extend( name, Object, classDefinition );
 		},
 		
 		
@@ -221,6 +235,9 @@
 		 * 
 		 * Note that calling superclass methods can be done with either the [Class].superclass or [Class].__super__ property.
 		 *
+		 * @param {String} [name] A name for the new subclass. It is recommended that you provide this, as this is set to the constructor's 
+		 *   `displayName` property to assist in debugging (esp. on Firefox), and is also used in error messages for subclasses 
+		 *   not implementing abstract methods, orphaned "override" methods, etc. 
 		 * @param {Function} superclass The constructor function of the class being extended. If making a brand new class with no superclass, this may
 		 *   either be omitted, or provided as `Object`.
 		 * @param {Object} overrides An object literal with members that make up the subclass's properties/method. These are copied into the subclass's
@@ -230,14 +247,23 @@
 		 *   **It is essential that you call the superclass constructor in any provided constructor.** See example code.
 		 * @return {Function} The subclass constructor from the `overrides` parameter, or a generated one if not provided.
 		 */
-		extend : function( superclass, overrides ) {	
-			// The first argument may be omitted, making Object the superclass
-			if( arguments.length === 1 ) {
-				overrides = superclass;
-				superclass = Object;
+		extend : function( name, superclass, overrides ) {
+			var args = Array.prototype.slice.call( arguments );
+			
+			if( typeof name !== 'string' ) {
+				args.unshift( "" );  // `name` arg
 			}
 			
-			return ClassBuilder.build( superclass, overrides );
+			// The second argument may be omitted, making Object the superclass
+			if( args.length === 2 ) {
+				args.splice( 1, 0, Object );
+			}
+			
+			name = args[ 0 ];
+			superclass = args[ 1 ];
+			overrides = args[ 2 ];
+			
+			return ClassBuilder.build( name, superclass, overrides );
 		},
 		
 	
@@ -423,11 +449,12 @@
 		/**
 		 * Builds a class from the `superclass` and `overrides` for the subclass.
 		 * 
+		 * @param {String} name A string name for the class.
 		 * @param {Function} superclass The constructor function of the class being extended. 
 		 * @param {Object} overrides An object literal with members that make up the subclass's properties/method.
 		 * @return {Function} The subclass constructor from the `overrides` parameter, or a generated one if not provided.
 		 */
-		build : function( superclass, overrides ) {
+		build : function( name, superclass, overrides ) {
 			// Grab any special properties from the overrides, and then delete them (except for `abstractClasss`) so that they 
 			// aren't applied to the subclass's prototype when we copy all of the 'overrides' properties there
 			var abstractClass = !!overrides.abstractClass,
@@ -461,13 +488,19 @@
 			var subclass = function() {
 				var proto = this.constructor.prototype;
 				if( proto.hasOwnProperty( 'abstractClass' ) && proto.abstractClass === true ) {
-					throw new Error( "Error: Cannot instantiate abstract class" );
+					var displayName = this.constructor.displayName;
+					throw new Error( "Error: Cannot instantiate abstract class" + ( displayName ? " '" + displayName + "'" : "" ) );
 				}
 				
 				// Call the actual constructor's implementation
 				return subclassCtorImplFn.apply( this, arguments );
 			};
 			
+			// Name provided, populate the special `displayName` property. Only supported by FF at the time of writing,
+			// but may gain more support as time goes on.
+			if( name ) {
+				subclass.displayName = name;
+			}
 			
 			ClassBuilder.createPrototypeChain( superclass, subclass );
 			ClassBuilder.attachCommonSubclassStatics( subclass );
@@ -570,10 +603,11 @@
 			
 			for( var methodName in subclassPrototype ) {
 				if( subclassPrototype[ methodName ] === Class.abstractMethod ) {  // NOTE: Do *not* filter out prototype properties; we want to test them
+					var displayName = subclassPrototype.constructor.displayName;
 					if( subclassPrototype.hasOwnProperty( methodName ) ) {
-						throw new Error( "The class being created has abstract method '" + methodName + "', but is not declared with 'abstractClass: true'" );
+						throw new Error( "The class " + ( displayName ? "'" + displayName + "'" : "being created" ) + " has abstract method '" + methodName + "', but is not declared with 'abstractClass: true'" );
 					} else {
-						throw new Error( "The concrete subclass being created must implement abstract method: '" + methodName + "', or be declared abstract as well (using 'abstractClass: true')" );
+						throw new Error( "The concrete subclass " + ( displayName ? "'" + displayName + "'" : "being created" ) + " must implement abstract method: '" + methodName + "', or be declared abstract as well (using 'abstractClass: true')" );
 					}
 				}
 			}
@@ -623,7 +657,13 @@
 		attachCommonSubclassStatics : function( subclass ) {
 			// Attach new static methods to the subclass
 			subclass.override = function( overrides ) { Class.override( subclass, overrides ); };
-			subclass.extend = function( overrides ) { return Class.extend( subclass, overrides ); };
+			subclass.extend = function( name, overrides ) {
+				if( arguments.length === 1 ) {
+					overrides = name;
+					name = "";
+				}
+				return Class.extend( name, subclass, overrides );
+			};
 			subclass.hasMixin = function( mixin ) { return Class.hasMixin( subclass, mixin ); };
 		},
 		

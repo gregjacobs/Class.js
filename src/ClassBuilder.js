@@ -24,11 +24,12 @@ var ClassBuilder = {
 	/**
 	 * Builds a class from the `superclass` and `overrides` for the subclass.
 	 * 
+	 * @param {String} name A string name for the class.
 	 * @param {Function} superclass The constructor function of the class being extended. 
 	 * @param {Object} overrides An object literal with members that make up the subclass's properties/method.
 	 * @return {Function} The subclass constructor from the `overrides` parameter, or a generated one if not provided.
 	 */
-	build : function( superclass, overrides ) {
+	build : function( name, superclass, overrides ) {
 		// Grab any special properties from the overrides, and then delete them (except for `abstractClasss`) so that they 
 		// aren't applied to the subclass's prototype when we copy all of the 'overrides' properties there
 		var abstractClass = !!overrides.abstractClass,
@@ -62,13 +63,19 @@ var ClassBuilder = {
 		var subclass = function() {
 			var proto = this.constructor.prototype;
 			if( proto.hasOwnProperty( 'abstractClass' ) && proto.abstractClass === true ) {
-				throw new Error( "Error: Cannot instantiate abstract class" );
+				var displayName = this.constructor.displayName;
+				throw new Error( "Error: Cannot instantiate abstract class" + ( displayName ? " '" + displayName + "'" : "" ) );
 			}
 			
 			// Call the actual constructor's implementation
 			return subclassCtorImplFn.apply( this, arguments );
 		};
 		
+		// Name provided, populate the special `displayName` property. Only supported by FF at the time of writing,
+		// but may gain more support as time goes on.
+		if( name ) {
+			subclass.displayName = name;
+		}
 		
 		ClassBuilder.createPrototypeChain( superclass, subclass );
 		ClassBuilder.attachCommonSubclassStatics( subclass );
@@ -171,10 +178,11 @@ var ClassBuilder = {
 		
 		for( var methodName in subclassPrototype ) {
 			if( subclassPrototype[ methodName ] === Class.abstractMethod ) {  // NOTE: Do *not* filter out prototype properties; we want to test them
+				var displayName = subclassPrototype.constructor.displayName;
 				if( subclassPrototype.hasOwnProperty( methodName ) ) {
-					throw new Error( "The class being created has abstract method '" + methodName + "', but is not declared with 'abstractClass: true'" );
+					throw new Error( "The class " + ( displayName ? "'" + displayName + "'" : "being created" ) + " has abstract method '" + methodName + "', but is not declared with 'abstractClass: true'" );
 				} else {
-					throw new Error( "The concrete subclass being created must implement abstract method: '" + methodName + "', or be declared abstract as well (using 'abstractClass: true')" );
+					throw new Error( "The concrete subclass " + ( displayName ? "'" + displayName + "'" : "being created" ) + " must implement abstract method: '" + methodName + "', or be declared abstract as well (using 'abstractClass: true')" );
 				}
 			}
 		}
@@ -224,7 +232,13 @@ var ClassBuilder = {
 	attachCommonSubclassStatics : function( subclass ) {
 		// Attach new static methods to the subclass
 		subclass.override = function( overrides ) { Class.override( subclass, overrides ); };
-		subclass.extend = function( overrides ) { return Class.extend( subclass, overrides ); };
+		subclass.extend = function( name, overrides ) {
+			if( arguments.length === 1 ) {
+				overrides = name;
+				name = "";
+			}
+			return Class.extend( name, subclass, overrides );
+		};
 		subclass.hasMixin = function( mixin ) { return Class.hasMixin( subclass, mixin ); };
 	},
 	

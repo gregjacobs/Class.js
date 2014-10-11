@@ -79,7 +79,8 @@ module.exports = function( grunt ) {
 				dest: 'docs',  // output dir
 		
 				options: {
-					'title': 'Class.js API Docs'
+					'title': 'Class.js API Docs',
+					'warnings' : [ '-req_after_opt' ]  // don't warn about optional method parameters coming before required ones
 				}
 			}
 		}

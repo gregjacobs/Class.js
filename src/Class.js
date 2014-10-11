@@ -119,12 +119,26 @@ var Class = {
 	 *     var Animal = Class.create( {
 	 *         // class definition here
 	 *     } );
+	 *     
+	 * Example with `name` argument (see below):
 	 * 
+	 *     var Animal = Class.create( 'Animal', {
+	 *         // class definition here
+	 *     } );
+	 * 
+	 * @param {String} [name] A name for the class. It is recommended that you provide this, as this is set to the constructor's 
+	 *   `displayName` property to assist in debugging (esp. on Firefox), and is also used in error messages for subclasses 
+	 *   not implementing abstract methods, orphaned "override" methods, etc. 
 	 * @param {Object} classDefinition The class definition. See the `overrides` parameter of {@link #extend}.
 	 * @return {Function} The generated class (constructor function).
 	 */
-	create : function( classDefinition ) {
-		return Class.extend( Object, classDefinition );
+	create : function( name, classDefinition ) {
+		if( typeof name !== 'string' ) {
+			classDefinition = name;
+			name = "";
+		}
+		
+		return Class.extend( name, Object, classDefinition );
 	},
 	
 	
@@ -202,6 +216,9 @@ var Class = {
 	 * 
 	 * Note that calling superclass methods can be done with either the [Class].superclass or [Class].__super__ property.
 	 *
+	 * @param {String} [name] A name for the new subclass. It is recommended that you provide this, as this is set to the constructor's 
+	 *   `displayName` property to assist in debugging (esp. on Firefox), and is also used in error messages for subclasses 
+	 *   not implementing abstract methods, orphaned "override" methods, etc. 
 	 * @param {Function} superclass The constructor function of the class being extended. If making a brand new class with no superclass, this may
 	 *   either be omitted, or provided as `Object`.
 	 * @param {Object} overrides An object literal with members that make up the subclass's properties/method. These are copied into the subclass's
@@ -211,14 +228,23 @@ var Class = {
 	 *   **It is essential that you call the superclass constructor in any provided constructor.** See example code.
 	 * @return {Function} The subclass constructor from the `overrides` parameter, or a generated one if not provided.
 	 */
-	extend : function( superclass, overrides ) {	
-		// The first argument may be omitted, making Object the superclass
-		if( arguments.length === 1 ) {
-			overrides = superclass;
-			superclass = Object;
+	extend : function( name, superclass, overrides ) {
+		var args = Array.prototype.slice.call( arguments );
+		
+		if( typeof name !== 'string' ) {
+			args.unshift( "" );  // `name` arg
 		}
 		
-		return ClassBuilder.build( superclass, overrides );
+		// The second argument may be omitted, making Object the superclass
+		if( args.length === 2 ) {
+			args.splice( 1, 0, Object );
+		}
+		
+		name = args[ 0 ];
+		superclass = args[ 1 ];
+		overrides = args[ 2 ];
+		
+		return ClassBuilder.build( name, superclass, overrides );
 	},
 	
 

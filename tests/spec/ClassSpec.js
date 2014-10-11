@@ -20,22 +20,105 @@ describe( "Class", function() {
 			expect( methodCalled ).toBe( true );  // orig YUI Test err msg: "The method should have been called from the prototype"
 		} );
 		
+		
+		it( "should accept a displayName argument for the new class", function() {
+			var constructorCalled = false,
+			    methodCalled = false;
+			
+			var MyClass = Class.create( 'MyClass', {
+				constructor : function() { constructorCalled = true; },
+				method : function() { methodCalled = true; }
+			} );
+			
+			var instance = new MyClass();
+			expect( instance.constructor.displayName ).toBe( 'MyClass' );
+			expect( constructorCalled ).toBe( true );
+			expect( instance.method ).toBe( MyClass.prototype.method );
+			
+			instance.method();
+			expect( methodCalled ).toBe( true );
+		} );
+		
 	} );
 	
 	
 	describe( 'extend()', function() {
 		
+		it( "should accept a displayName argument for the new class, when not providing a `superclass` (i.e. `superclass` should default to Object)", function() {
+			var constructorCalled = false,
+			    methodCalled = false;
+			
+			var MyClass = Class.extend( 'MyClass', {
+				constructor : function() { constructorCalled = true; },
+				method : function() { methodCalled = true; }
+			} );
+			
+			var instance = new MyClass();
+			expect( instance.constructor.displayName ).toBe( 'MyClass' );
+			expect( constructorCalled ).toBe( true );
+			expect( instance.method ).toBe( MyClass.prototype.method );
+			
+			instance.method();
+			expect( methodCalled ).toBe( true );
+		} );
+		
+		
+		it( "should accept a displayName argument for the new class, when providing a `superclass`", function() {
+			var constructorCalled = false,
+			    methodCalled = false;
+			
+			var Animal = Class.create( 'Animal', {
+				constructor : function( name ) { this._name = name; },
+				getName     : function() { return this._name; }
+			} );
+			
+			var Cat = Class.extend( 'Cat', Animal, {
+				constructor: function() {
+					this._super( arguments );
+					this._willMeow = true;
+				},
+				
+				willMeow : function() { return this._willMeow; }
+			} );
+			
+			var kitty = new Cat( 'Trevor' );
+			expect( kitty.constructor.displayName ).toBe( 'Cat' );
+			expect( kitty.getName() ).toEqual( 'Trevor' );
+			expect( kitty.willMeow() ).toBe( true );
+		} );
+		
+		
+		it( "should accept a displayName argument for the new class when using the static `extend()` method placed on the superclass", function() {
+			var constructorCalled = false,
+			    methodCalled = false;
+			
+			var Animal = Class.create( 'Animal', {
+				constructor : function( name ) { this._name = name; },
+				getName     : function() { return this._name; }
+			} );
+			
+			var Cat = Animal.extend( 'Cat', {
+				constructor: function() {
+					this._super( arguments );
+					this._willMeow = true;
+				},
+				
+				willMeow : function() { return this._willMeow; }
+			} );
+			
+			var kitty = new Cat( 'Trevor' );
+			expect( kitty.constructor.displayName ).toBe( 'Cat' );
+			expect( kitty.getName() ).toEqual( 'Trevor' );
+			expect( kitty.willMeow() ).toBe( true );
+		} );
+		
+		
 		describe( "Test basic extend() functionality (prototype inheritance, constructor reference fixing, superclass reference", function() {
 			
 			it( "should set up prototype-chained inheritance", function() {
 				var Animal = Class.create( {
-					constructor: function( name ) {
-						this._name = name;
-					},
-					
-					getName : function() {
-						return this._name;
-					}
+					constructor : function( name ) { this._name = name; },
+					getName     : function() { return this._name; }
 				} );
 				
 				var Cat = Class.extend( Animal, {
@@ -44,14 +127,12 @@ describe( "Class", function() {
 						this._willMeow = true;
 					},
 					
-					willMeow : function() {
-						return this._willMeow;
-					}
+					willMeow : function() { return this._willMeow; }
 				} );
 				
 				var kitty = new Cat( 'Trevor' );
-				expect( kitty.getName() ).toEqual( 'Trevor' );  // orig YUI Test err msg: "The kitty has the wrong name!"
-				expect( kitty.willMeow() ).toBe( true );  // orig YUI Test err msg: "The kitty won't meow!"
+				expect( kitty.getName() ).toEqual( 'Trevor' );
+				expect( kitty.willMeow() ).toBe( true );
 			} );
 			
 			
@@ -712,8 +793,17 @@ describe( "Class", function() {
 					} );
 					
 					var instance = new AbstractClass();
-					expect( true ).toBe( false );  // orig YUI Test err msg: "The test should have thrown an error when attempting to instantiate an abstract class"
-				} ).toThrow( new Error( "Error: Cannot instantiate abstract class" ) );
+				} ).toThrowError( "Error: Cannot instantiate abstract class" );
+				
+				
+				// Check error message if the class has a display name
+				expect( function() {
+					var AbstractClass = Class.create( 'MyAbstractClass', {
+						abstractClass: true
+					} );
+					
+					var instance = new AbstractClass();
+				} ).toThrowError( "Error: Cannot instantiate abstract class 'MyAbstractClass'" );
 			} );
 			
 			
@@ -727,8 +817,20 @@ describe( "Class", function() {
 					} );
 					
 					var instance = new AbstractClass();
-					expect( true ).toBe( false );  // orig YUI Test err msg: "The test should have thrown an error when attempting to instantiate an abstract class"
-				} ).toThrow( new Error( "Error: Cannot instantiate abstract class" ) );
+				} ).toThrowError( "Error: Cannot instantiate abstract class" );
+				
+				
+				// Check error message if the class has a display name
+				expect( function() {
+					var AbstractClass = Class.create( 'MyAbstractClass', {
+						abstractClass: true,
+						
+						// Declare own constructor
+						constructor : function() {}
+					} );
+					
+					var instance = new AbstractClass();
+				} ).toThrowError( "Error: Cannot instantiate abstract class 'MyAbstractClass'" );
 			} );
 			
 			
@@ -793,29 +895,41 @@ describe( "Class", function() {
 						concreteMethod : function() {},
 						abstractMethod : Class.abstractMethod
 					} );
-					
-					expect( true ).toBe( false );  // orig YUI Test err msg: "Test should have thrown an error for a concrete class with an abstract method"
-				} ).toThrow( new Error( "The class being created has abstract method 'abstractMethod', but is not declared with 'abstractClass: true'" ) );
+				} ).toThrowError( "The class being created has abstract method 'abstractMethod', but is not declared with 'abstractClass: true'" );
+				
+				// Check message when the class has a display name
+				expect( function() {
+					var ConcreteClass = Class.create( 'Concrete', {
+						concreteMethod : function() {},
+						abstractMethod : Class.abstractMethod
+					} );
+				} ).toThrowError( "The class 'Concrete' has abstract method 'abstractMethod', but is not declared with 'abstractClass: true'" );
 			} );
 			
 			
 			it( "should throw an error if a concrete class does not implement all abstract methods from its superclass", function() {
+				var AbstractClass = Class.create( {
+					abstractClass : true,
+					
+					concreteMethod : function() {},
+					abstractMethod1 : Class.abstractMethod,
+					abstractMethod2 : Class.abstractMethod
+				} );
+				
+				
 				expect( function() {
-					var AbstractClass = Class.create( {
-						abstractClass : true,
-						
-						concreteMethod : function() {},
-						abstractMethod1 : Class.abstractMethod,
-						abstractMethod2 : Class.abstractMethod
-					} );
-					
 					var ConcreteClass = AbstractClass.extend( {
-						// *** Only implement 1 of the 2 abstract methods
-						abstractMethod1 : function(){}
+						abstractMethod1 : function(){}  // *** Only implement 1 of the 2 abstract methods
 					} );
-					
-					expect( true ).toBe( false );  // orig YUI Test err msg: "Test should have thrown an error for a concrete class with an abstract method (abstractMethod2 not implemented)"
-				} ).toThrow( new Error( "The concrete subclass being created must implement abstract method: 'abstractMethod2', or be declared abstract as well (using 'abstractClass: true')" ) );
+				} ).toThrowError( "The concrete subclass being created must implement abstract method: 'abstractMethod2', or be declared abstract as well (using 'abstractClass: true')" );
+				
+				
+				// Check error message when the class has a display name
+				expect( function() {
+					var ConcreteClass = AbstractClass.extend( 'Concrete', {
+						abstractMethod1 : function(){}  // *** Only implement 1 of the 2 abstract methods
+					} );
+				} ).toThrowError( "The concrete subclass 'Concrete' must implement abstract method: 'abstractMethod2', or be declared abstract as well (using 'abstractClass: true')" );
 			} );
 			
 			
