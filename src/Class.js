@@ -377,6 +377,11 @@
 		},
 		
 		
+		/**
+		 * @private
+		 * @param {Function} superclass
+		 * @param {Object} overrides
+		 */
 		createConstructor : function( superclass, overrides ) {
 			var subclassCtorImplFn;
 			
@@ -391,6 +396,11 @@
 		},
 		
 		
+		/**
+		 * @private
+		 * @param {Function} superclass
+		 * @param {Function} subclass
+		 */
 		createPrototypeChain : function( superclass, subclass ) {
 			var superclassPrototype = superclass.prototype,
 			    subclassPrototype = subclass.prototype;
@@ -404,7 +414,10 @@
 		},
 		
 		
-		
+		/**
+		 * @private
+		 * @param {Function} subclass
+		 */
 		checkAbstractMethodsImplemented : function( subclass ) {
 			var subclassPrototype = subclass.prototype;
 			
@@ -420,6 +433,11 @@
 		},
 		
 		
+		/**
+		 * @private
+		 * @param {Function} superclass
+		 * @param {Object} overrides
+		 */
 		wrapSuperclassCallingMethods : function( superclass, overrides ) {
 			var superclassPrototype = superclass.prototype;
 			
@@ -451,6 +469,10 @@
 		},
 		
 		
+		/**
+		 * @private
+		 * @param {Function} subclass
+		 */
 		attachCommonSubclassStatics : function( subclass ) {
 			// Attach new static methods to the subclass
 			subclass.override = function( overrides ) { Class.override( subclass, overrides ); };
@@ -459,7 +481,13 @@
 		},
 		
 		
-		// Attach new instance methods to the subclass
+		/**
+		 * Attach new instance methods to the subclass
+		 * 
+		 * @private
+		 * @param {Function} superclass
+		 * @param {Function} subclass
+		 */
 		attachCommonSubclassInstanceMethods : function( superclass, subclass ) {
 			var subclassPrototype = subclass.prototype;
 			subclassPrototype.superclass = subclassPrototype.supr = function() { return superclass.prototype; };
@@ -468,7 +496,14 @@
 		},
 		
 		
-		// A function which wraps methods of the new subclass that can call their superclass method
+		/**
+		 * Creates a function that wraps methods of the new subclass that can call their superclass method.
+		 * 
+		 * @private
+		 * @param {Function} superclass
+		 * @param {String} fnName
+		 * @param {Function} fn
+		 */
 		createSuperclassCallingMethod : function( superclass, fnName, fn ) {
 			var superclassPrototype = superclass.prototype;
 			
@@ -491,6 +526,12 @@
 			};
 		},
 		
+		
+		/**
+		 * @private
+		 * @param {Function} subclass
+		 * @param {Function[]} mixins
+		 */
 		applyMixins : function( subclass, mixins ) {
 			var subclassPrototype = subclass.prototype;
 			
