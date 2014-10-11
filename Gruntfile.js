@@ -7,7 +7,7 @@ module.exports = function( grunt ) {
 	// Register main tasks
 	grunt.registerTask( 'default', [ 'jshint', 'build', 'jasmine' ] );
 	grunt.registerTask( 'build', [ 'concat:development', 'uglify:production' ] );
-	grunt.registerTask( 'doc', "Builds the documentation.", [ 'build', 'compileDocs' ] );
+	grunt.registerTask( 'doc', "Builds the documentation.", [ 'jshint', 'build', 'compileDocs' ] );
 	
 	
 	// Register sub-tasks. These aren't meant to be called directly, but are used as part of the main tasks.
@@ -52,7 +52,9 @@ module.exports = function( grunt ) {
 					}
 				},
 				src: [
-					'src/Class.js'
+					'src/Class.js',
+					'src/ClassBuilder.js',
+					'src/Util.js'
 				],
 				dest: 'dist/Class.js'
 			}
