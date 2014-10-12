@@ -130,9 +130,10 @@ var ClassBuilder = {
 		return subclass;
 	},
 	
-	
-	
+		
 	/**
+	 * Creates the constructor function for the new subclass.
+	 * 
 	 * @private
 	 * @param {Function} superclass
 	 * @param {Object} overrides
@@ -152,6 +153,8 @@ var ClassBuilder = {
 	
 	
 	/**
+	 * Creates the single-inheritance prototype chain from `subclass` to `superclass`.
+	 * 
 	 * @private
 	 * @param {Function} superclass
 	 * @param {Function} subclass
@@ -170,14 +173,19 @@ var ClassBuilder = {
 	
 	
 	/**
+	 * Checks the `subclass` to make sure that all abstract methods are implemented. This is used to check concrete
+	 * subclasses.
+	 * 
 	 * @private
 	 * @param {Function} subclass
+	 * @throws {Error} If an abstract method is not implemented.
 	 */
 	checkAbstractMethodsImplemented : function( subclass ) {
-		var subclassPrototype = subclass.prototype;
+		var subclassPrototype = subclass.prototype,
+		    abstractMethod = Class.abstractMethod;
 		
 		for( var methodName in subclassPrototype ) {
-			if( subclassPrototype[ methodName ] === Class.abstractMethod ) {  // NOTE: Do *not* filter out prototype properties; we want to test them
+			if( subclassPrototype[ methodName ] === abstractMethod ) {  // NOTE: Do *not* filter out prototype properties; we want to test them
 				var displayName = subclassPrototype.constructor.displayName;
 				if( subclassPrototype.hasOwnProperty( methodName ) ) {
 					throw new Error( "The class " + ( displayName ? "'" + displayName + "'" : "being created" ) + " has abstract method '" + methodName + "', but is not declared with 'abstractClass: true'" );
@@ -190,6 +198,9 @@ var ClassBuilder = {
 	
 	
 	/**
+	 * Wraps the methods of the new subclass which call `this._super()` in the superclass calling function (which
+	 * implements `this._super()` behind the scenes).
+	 * 
 	 * @private
 	 * @param {Function} superclass
 	 * @param {Object} overrides
@@ -226,17 +237,15 @@ var ClassBuilder = {
 	
 	
 	/**
+	 * Attaches the Class.js static methods to the `subclass`.
+	 * 
 	 * @private
 	 * @param {Function} subclass
 	 */
 	attachCommonSubclassStatics : function( subclass ) {
-		// Attach new static methods to the subclass
 		subclass.override = function( overrides ) { Class.override( subclass, overrides ); };
 		subclass.extend = function( name, overrides ) {
-			if( arguments.length === 1 ) {
-				overrides = name;
-				name = "";
-			}
+			if( arguments.length === 1 ) { overrides = name; name = ""; }
 			return Class.extend( name, subclass, overrides );
 		};
 		subclass.hasMixin = function( mixin ) { return Class.hasMixin( subclass, mixin ); };
@@ -244,7 +253,7 @@ var ClassBuilder = {
 	
 	
 	/**
-	 * Attach new instance methods to the subclass
+	 * Attaches the Class.js instance methods to the `subclass`.
 	 * 
 	 * @private
 	 * @param {Function} superclass
@@ -263,8 +272,8 @@ var ClassBuilder = {
 	 * 
 	 * @private
 	 * @param {Function} superclass
-	 * @param {String} fnName
-	 * @param {Function} fn
+	 * @param {String} fnName The target method name, used to look up in the superclass.
+	 * @param {Function} fn The target method.
 	 */
 	createSuperclassCallingMethod : function( superclass, fnName, fn ) {
 		var superclassPrototype = superclass.prototype;
@@ -290,6 +299,8 @@ var ClassBuilder = {
 	
 	
 	/**
+	 * Applies the mixin classes' prototype properties to the `subclass`
+	 * 
 	 * @private
 	 * @param {Function} subclass
 	 * @param {Function[]} mixins
@@ -298,13 +309,7 @@ var ClassBuilder = {
 		var subclassPrototype = subclass.prototype;
 		
 		for( var i = mixins.length-1; i >= 0; i-- ) {
-			var mixinPrototype = mixins[ i ].prototype;
-			for( var prop in mixinPrototype ) {
-				// Do not overwrite properties that already exist on the prototype
-				if( typeof subclassPrototype[ prop ] === 'undefined' ) {
-					subclassPrototype[ prop ] = mixinPrototype[ prop ];
-				}
-			}
+			Util.defaults( subclassPrototype, mixins[ i ].prototype );
 		}
 		
 		// Store which mixin classes the subclass has. This is used in the hasMixin() method
