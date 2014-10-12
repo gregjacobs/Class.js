@@ -416,4 +416,85 @@ describe( "Class", function() {
 		
 	} );
 	
+	
+	describe( 'annotate()', function() {
+		
+		function numEnumerableProps( obj ) {
+			var size = 0;
+			for( var prop in obj )
+				if( obj.hasOwnProperty( prop ) ) size++;
+			
+			return size;
+		}
+		
+		it( "should return the method unchanged if no annotations were provided", function() {
+			var origFn = function() {},
+			    method = Class.annotate( origFn );
+			
+			expect( numEnumerableProps( method ) ).toBe( 0 );  // shouldn't have any enumerable properties, since none should have been added by annotate()
+		} );
+		
+		
+		it( "should add the `override` annotation to a function", function() {
+			var origFn = function() {},
+			    method = Class.annotate( 'Override', origFn );
+			
+			expect( method ).toBe( origFn );  // should return the same function
+			expect( method.__Class_overrideMethod ).toBe( true );
+		} );
+		
+		
+		it( "should add the `final` annotation to a function", function() {
+			var origFn = function() {},
+			    method = Class.annotate( 'Override', origFn );
+			
+			expect( method ).toBe( origFn );  // should return the same function
+			expect( method.__Class_overrideMethod ).toBe( true );
+		} );
+		
+		
+		it( "should be able to add both the `override` and `final` annotation to a function", function() {
+			var origFn = function() {},
+			    method = Class.annotate( 'Final', 'Override', origFn );
+			
+			expect( method ).toBe( origFn );  // should return the same function
+			expect( method.__Class_overrideMethod ).toBe( true );
+			expect( method.__Class_finalMethod ).toBe( true );
+		} );
+		
+		
+		it( "should throw an error for an unknown annotation", function() {
+			expect( function() {
+				Class.annotate( 'Unknown', function(){} );
+			} ).toThrowError( "Unknown annotation 'Unknown'" );
+		} );
+		
+	} );
+	
+	
+	describe( 'overrideMethod()', function() {
+		
+		it( "should annotate a method to be an override method by adding the property `__Class_overrideMethod`", function() {
+			var origFn = function() {},
+			    method = Class.overrideMethod( origFn );
+			
+			expect( method ).toBe( origFn );  // should return the same function
+			expect( method.__Class_overrideMethod ).toBe( true );
+		} );
+		
+	} );
+	
+	
+	describe( 'final()', function() {
+		
+		it( "should annotate a method to be an override method by adding the property `__Class_finalMethod`", function() {
+			var origFn = function() {},
+			    method = Class.finalMethod( origFn );
+			
+			expect( method ).toBe( origFn );  // should return the same function
+			expect( method.__Class_finalMethod ).toBe( true );
+		} );
+		
+	} );
+	
 } );

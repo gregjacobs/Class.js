@@ -215,28 +215,27 @@ describe( "ClassBuilder", function() {
 			
 			
 			it( "should create the this._super() method for subclass constructor functions, even if the superclass is not defined using Class.extend()", function() {
-				var superclassConstructorCallCount = 0;
-				var A = function() {
-					superclassConstructorCallCount++;
+				var superclassCtorCallCount = 0;
+				var Superclass = function() {
+					superclassCtorCallCount++;
 				};
 				
-				var B = ClassBuilder.build( "", A, {
+				var Subclass = ClassBuilder.build( "", Superclass, {
 					constructor : function() {
 						this._super();
 					}
 				} );
 				
-				var instance = new B();
-				expect( superclassConstructorCallCount ).toBe( 1 );  // orig YUI Test err msg: "The superclass's constructor should have been called (exactly once)"
+				var instance = new Subclass();
+				expect( superclassCtorCallCount ).toBe( 1 );
 			} );
 			
 			
 			it( "should create the this._super() method for subclass constructor functions, even if the superclass does not explicitly define a constructor", function() {
 				var superclassConstructorCallCount = 0;
 				
-				var A = ClassBuilder.build( "", Object, {} );
-				
-				var B = A.extend( {
+				var Superclass = ClassBuilder.build( "", Object, {} );
+				var Subclass = Superclass.extend( {
 					constructor : function() {
 						this._super();
 						
@@ -244,51 +243,51 @@ describe( "ClassBuilder", function() {
 					}
 				} );
 				
-				var instance = new B();
+				var instance = new Subclass();
 				// Note: Test should simply not throw an error, but check that B's `myVar` instance variable is set
-				expect( instance.myVar ).toBe( 0 );  // orig YUI Test err msg: "B's `myVar` instance variable should have been set"
+				expect( instance.myVar ).toBe( 0 );
 			} );
 			
 			
 			it( "should create the this._super() method for subclass methods that have a corresponding superclass method", function() {
-				var myMethodCallCount = 0;
+				var methodCallCount = 0;
 				
-				var A = ClassBuilder.build( "", Object, {
-					myMethod : function() {
-						myMethodCallCount++;
+				var Superclass = ClassBuilder.build( "", Object, {
+					method : function() {
+						methodCallCount++;
 					}
 				} );
 				
-				var B = A.extend( {
-					myMethod : function() {
+				var Subclass = ClassBuilder.build( "", Superclass, {
+					method : function() {
 						this._super();
 					}
 				} );
 				
-				var instance = new B();
-				instance.myMethod();
-				expect( myMethodCallCount ).toBe( 1 );  // orig YUI Test err msg: "The superclass myMethod() should have been called exactly once"
+				var instance = new Subclass();
+				instance.method();
+				expect( methodCallCount ).toBe( 1 );
 			} );
 			
 			
 			it( "should create the this._super() method for subclass methods that have a corresponding superclass method, and be able to pass up arguments", function() {
 				var superclassMethodArgs;
 				
-				var A = ClassBuilder.build( "", Object, {
-					myMethod : function() {
+				var Superclass = ClassBuilder.build( "", Object, {
+					method : function() {
 						superclassMethodArgs = arguments;
 					}
 				} );
 				
-				var B = A.extend( {
-					myMethod : function( a, b, c ) {
+				var Subclass = Superclass.extend( {
+					method : function( a, b, c ) {
 						this._super( arguments );
 					}
 				} );
 				
 				
-				var instance = new B();
-				instance.myMethod( 1, 2, 3 );
+				var instance = new Subclass();
+				instance.method( 1, 2, 3 );
 				expect( superclassMethodArgs.length ).toBe( 3 );
 				expect( superclassMethodArgs[ 0 ] ).toBe( 1 );
 				expect( superclassMethodArgs[ 1 ] ).toBe( 2 );
@@ -297,73 +296,73 @@ describe( "ClassBuilder", function() {
 			
 			
 			it( "should create the this._super() method, and return the value from the call to this._super()", function() {
-				var A = ClassBuilder.build( "", Object, {
-					myMethod : function() {
+				var Superclass = ClassBuilder.build( "", Object, {
+					method : function() {
 						return 42;
 					}
 				} );
 				
-				var B = A.extend( {
-					myMethod : function() {
+				var Subclass = Superclass.extend( {
+					method : function() {
 						return this._super();
 					}
 				} );
 				
-				var instance = new B();
-				var myMethodResult = instance.myMethod();
-				expect( myMethodResult ).toBe( 42 );
+				var instance = new Subclass();
+				var methodResult = instance.method();
+				expect( methodResult ).toBe( 42 );
 			} );
 			
 			
 			it( "should create the this._super() method for subclass methods that have a corresponding superclass method, even if the superclass is not defined using Class.extend()", function() {
-				var myMethodCallCount = 0;
+				var methodCallCount = 0;
 				
-				var A = function(){};
-				A.prototype.myMethod = function() {
-					myMethodCallCount++;
+				var Superclass = function(){};
+				Superclass.prototype.method = function() {
+					methodCallCount++;
 				};
 				
-				var B = ClassBuilder.build( "", A, {
-					myMethod : function() {
+				var Subclass = ClassBuilder.build( "", Superclass, {
+					method : function() {
 						this._super();
 					}
 				} );
 				
-				var instance = new B();
-				instance.myMethod();
-				expect( myMethodCallCount ).toBe( 1 );  // orig YUI Test err msg: "The superclass myMethod() should have been called exactly once"
+				var instance = new Subclass();
+				instance.method();
+				expect( methodCallCount ).toBe( 1 );
 			} );
 			
 			
 			it( "should NOT create the this._super() method for subclass methods that do not have a corresponding superclass method", function() {
-				var myMethodCallCount = 0;
+				var methodCallCount = 0;
 				
 				var A = ClassBuilder.build( "", Object, {
-					// note: no superclass myMethod
+					// note: no superclass method
 				} );
 				
 				var B = A.extend( {
-					myMethod : function() {
+					method : function() {
 						this._super();
 					}
 				} );
 				
 				var instance = new B();
 				expect( function() {
-					instance.myMethod();
+					instance.method();
 				} ).toThrowError( /\b_super\b|'?undefined'? is not a function|object doesn't support this property or method/ );
 			} );
 			
 			
 			it( "should NOT create the this._super() method for subclass methods that do not call _super()", function() {
-				var myMethodCallCount = 0;
+				var methodCallCount = 0;
 				
 				var A = ClassBuilder.build( "", Object, {
-					// note: no superclass myMethod
+					// note: no superclass method
 				} );
 				
 				var B = A.extend( {
-					myMethod : function() {
+					method : function() {
 						// Piece together the "_super" string, to fool the code into thinking that this method
 						// does not call its superclass method. However, in real-world code, this wouldn't (or at least 
 						// shouldn't!) be done, so real-world code will be fine
@@ -375,7 +374,7 @@ describe( "ClassBuilder", function() {
 				var instance = new B();
 				
 				expect( function() {
-					instance.myMethod();
+					instance.method();
 				} ).toThrowError( /\b_super\b|'?undefined'? is not a function|object doesn't support this property or method/ );
 			} );
 			
@@ -394,7 +393,7 @@ describe( "ClassBuilder", function() {
 					innerClass : InnerClass
 				} );
 				
-				expect( OuterSubClass.prototype.innerClass ).toBe( InnerClass );  // orig YUI Test err msg: "The 'innerClass' on OuterClass's prototype should be the exact InnerClass constructor function reference, not a this._super() wrapping function (or anything else...)"
+				expect( OuterSubClass.prototype.innerClass ).toBe( InnerClass );
 			} );
 			
 			
@@ -413,7 +412,7 @@ describe( "ClassBuilder", function() {
 					innerClass : InnerClass
 				} );
 				
-				expect( OuterSubClass.prototype.innerClass ).toBe( InnerClass );  // orig YUI Test err msg: "The 'innerClass' on OuterClass's prototype should be the exact InnerClass constructor function reference, not a this._super() wrapping function (or anything else...)"
+				expect( OuterSubClass.prototype.innerClass ).toBe( InnerClass );
 			} );
 			
 		} );
@@ -435,15 +434,15 @@ describe( "ClassBuilder", function() {
 			
 			
 			it( "The static properties defined in `statics` should not be inherited to subclasses", function() {
-				var MyClass = ClassBuilder.build( "", Object, {
+				var Superclass = ClassBuilder.build( "", Object, {
 					statics : {
 						staticFn : function() {}
 					}
 				} );
-				var MySubClass = MyClass.extend( {} );
+				var Subclass = ClassBuilder.build( "", Superclass, {} );
 				
-				expect( typeof MyClass.staticFn ).toBe( 'function' );
-				expect( MySubClass.staticFn ).toBeUndefined();
+				expect( typeof Superclass.staticFn ).toBe( 'function' );
+				expect( Subclass.staticFn ).toBeUndefined();
 			} );
 			
 			
@@ -467,7 +466,7 @@ describe( "ClassBuilder", function() {
 		} );
 		
 		
-		describe( "Test extend() inheritedStatics functionality", function() {
+		describe( "`inheritedStatics` functionality", function() {
 			
 			it( "should add static properties defined in `inheritedStatics`", function() {
 				var MyClass = ClassBuilder.build( "", Object, {
@@ -483,36 +482,40 @@ describe( "ClassBuilder", function() {
 			
 			
 			it( "The static properties defined in `inheritedStatics` should be inherited to subclasses", function() {
-				var MyClass = ClassBuilder.build( "", Object, {
+				var staticFn = function() {};
+				
+				var Superclass = ClassBuilder.build( "", Object, {
 					inheritedStatics : {
-						staticFn : function() {}
+						staticFn : staticFn
 					}
 				} );
-				var MySubClass = MyClass.extend( {} );
-				var MySubSubClass = MySubClass.extend( {} );
-				var MySubSubSubClass = MySubSubClass.extend( {} );
+				var Subclass = Superclass.extend( {} );
+				var SubSubclass = Subclass.extend( {} );
+				var SubSubSubclass = SubSubclass.extend( {} );
 				
-				expect( typeof MyClass.staticFn ).toBe( 'function' );  // orig YUI Test err msg: "The staticFn should exist on the class it was defined on with `inheritedStatics`"
-				expect( typeof MySubClass.staticFn ).toBe( 'function' );  // orig YUI Test err msg: "The staticFn should exist on a direct subclass"
-				expect( typeof MySubSubClass.staticFn ).toBe( 'function' );  // orig YUI Test err msg: "The staticFn should exist on a subclass 2 subclasses down from the class that defined it"
-				expect( typeof MySubSubSubClass.staticFn ).toBe( 'function' );  // orig YUI Test err msg: "The staticFn should exist on a subclass 3 subclasses down from the class that defined it"
+				expect( Superclass.staticFn ).toBe( staticFn );
+				expect( Subclass.staticFn ).toBe( staticFn );
+				expect( SubSubclass.staticFn ).toBe( staticFn );
+				expect( SubSubSubclass.staticFn ).toBe( staticFn );
 			} );
 			
 			
 			it( "The static properties defined in `inheritedStatics` should be inherited to subclasses, but not affect superclasses", function() {
-				var MyClass = Class.extend( {} );
-				var MySubClass = MyClass.extend( {} );
-				var MySubSubClass = MySubClass.extend( {
+				var staticFn = function() {};
+				
+				var Superclass = Class.extend( {} );
+				var Subclass = Superclass.extend( {} );
+				var SubSubclass = Subclass.extend( {
 					inheritedStatics : {
-						staticFn : function() {}
+						staticFn : staticFn
 					}
 				} );
-				var MySubSubSubClass = MySubSubClass.extend( {} );
+				var SubSubSubclass = SubSubclass.extend( {} );
 				
-				expect( MyClass.staticFn ).toBeUndefined();  // orig YUI Test err msg: "The staticFn should not exist on a far superclass that has a subclass with `inheritableStatics`"
-				expect( MySubClass.staticFn ).toBeUndefined();  // orig YUI Test err msg: "The staticFn should not exist on a direct superclass of a subclass with `inheritableStatics`"
-				expect( typeof MySubSubClass.staticFn ).toBe( 'function' );  // orig YUI Test err msg: "The staticFn should exist on the subclass that `inheritableStatics` was defined on"
-				expect( typeof MySubSubSubClass.staticFn ).toBe( 'function' );  // orig YUI Test err msg: "The staticFn should exist on a subclass of the class that defined `inheritableStatics`"
+				expect( Superclass.staticFn ).toBeUndefined();
+				expect( Subclass.staticFn ).toBeUndefined();
+				expect( SubSubclass.staticFn ).toBe( staticFn );
+				expect( SubSubSubclass.staticFn ).toBe( staticFn );
 			} );
 			
 			
@@ -531,8 +534,8 @@ describe( "ClassBuilder", function() {
 					}
 				} );
 				
-				expect( MyClass.method ).toBe( method );  // orig YUI Test err msg: "Initial condition: MyClass should have the original method"
-				expect( MySubClass.method ).toBe( subclassMethod );  // orig YUI Test err msg: "MySubClass should have the new method (overriding the superclass static method)"
+				expect( MyClass.method ).toBe( method );
+				expect( MySubClass.method ).toBe( subclassMethod );
 			} );
 			
 			
@@ -552,9 +555,9 @@ describe( "ClassBuilder", function() {
 				} );
 				var MySubSubClass = MySubClass.extend( {} );
 				
-				expect( MyClass.method ).toBe( inheritedMethod );  // orig YUI Test err msg: "Initial condition: MyClass should have the original inheritedMethod"
-				expect( MySubClass.method ).toBe( overrideStaticMethod );  // orig YUI Test err msg: "MySubClass should have the new `static` method (overriding the superclass static method)"
-				expect( MySubSubClass.method ).toBe( inheritedMethod );  // orig YUI Test err msg: "MySubSubClass should have the original inheritedMethod (the non-inherited `static` method in its superclass should not have affected this behavior)"
+				expect( MyClass.method ).toBe( inheritedMethod );
+				expect( MySubClass.method ).toBe( overrideStaticMethod );
+				expect( MySubSubClass.method ).toBe( inheritedMethod );
 			} );
 			
 			
@@ -600,7 +603,7 @@ describe( "ClassBuilder", function() {
 				
 				var instance = new MyClass(); 
 				instance.mixinFn();   // execute the function
-				expect( mixinFnExecuted ).toBe( true );  // orig YUI Test err msg: "The mixin function was not properly added to MyClass."
+				expect( mixinFnExecuted ).toBe( true );
 			} );
 			
 			
@@ -625,10 +628,10 @@ describe( "ClassBuilder", function() {
 				
 				
 				var instance = new MyClass(); 
-				expect( instance.testProp ).toBe( "MyClass defined" );  // orig YUI Test err msg: "The mixin should not overwrite the class's properties"
+				expect( instance.testProp ).toBe( "MyClass defined" );
 				
 				instance.testMethod();
-				expect( data ).toBe( "MyClass defined" );  // orig YUI Test err msg: "The mixin's method should not have overwritten the class's method."
+				expect( data ).toBe( "MyClass defined" );
 			} );
 			
 			
@@ -645,7 +648,7 @@ describe( "ClassBuilder", function() {
 				} );
 				
 				var instance = new MyClass();
-				expect( instance.testProp ).toBe( "Mixin2 defined" );  // orig YUI Test err msg: "The second mixin's properties/methods should take precedence over the first one's."
+				expect( instance.testProp ).toBe( "Mixin2 defined" );
 			} );
 			
 			
@@ -657,8 +660,8 @@ describe( "ClassBuilder", function() {
 					mixins : [ Mixin ]
 				} );
 				
-				expect( MyClass.hasMixin( Mixin ) ).toBe( true );  // orig YUI Test err msg: "MyClass should have the mixin 'Mixin'"
-				expect( MyClass.hasMixin( SomeOtherMixin ) ).toBe( false );  // orig YUI Test err msg: "MyClass should *not* have the mixin 'SomeOtherMixin'"
+				expect( MyClass.hasMixin( Mixin ) ).toBe( true );
+				expect( MyClass.hasMixin( SomeOtherMixin ) ).toBe( false );
 			} );
 			
 			
@@ -671,8 +674,8 @@ describe( "ClassBuilder", function() {
 				} );
 				var myInstance = new MyClass();
 				
-				expect( myInstance.hasMixin( Mixin ) ).toBe( true );  // orig YUI Test err msg: "myInstance should have the mixin 'Mixin'"
-				expect( myInstance.hasMixin( SomeOtherMixin ) ).toBe( false );  // orig YUI Test err msg: "myInstance should *not* have the mixin 'SomeOtherMixin'"
+				expect( myInstance.hasMixin( Mixin ) ).toBe( true );
+				expect( myInstance.hasMixin( SomeOtherMixin ) ).toBe( false );
 			} );
 			
 		} );
@@ -757,7 +760,7 @@ describe( "ClassBuilder", function() {
 				} );
 				
 				var instance = new ConcreteClass();
-				expect( abstractClassConstructorCallCount ).toBe( 1 );  // orig YUI Test err msg: "The abstract class's constructor should have been called exactly once"
+				expect( abstractClassConstructorCallCount ).toBe( 1 );
 			} );
 			
 			
@@ -779,7 +782,7 @@ describe( "ClassBuilder", function() {
 				} );
 				
 				var instance = new ConcreteClass();
-				expect( abstractClassConstructorCallCount ).toBe( 1 );  // orig YUI Test err msg: "The abstract class's constructor should have been called exactly once"
+				expect( abstractClassConstructorCallCount ).toBe( 1 );
 			} );
 			
 			
@@ -890,9 +893,9 @@ describe( "ClassBuilder", function() {
 							onClassCreateCallCount++;
 							
 							// ASSERTS CONTINUE HERE
-							expect( typeof newClass.someStaticMethod ).toBe( 'function' );  // orig YUI Test err msg: "someStaticMethod should exist as a static method by this point"
-							expect( typeof newClass.someInheritedStaticMethod ).toBe( 'function' );  // orig YUI Test err msg: "someInheritedStaticMethod should exist as a static method by this point"
-							expect( typeof newClass.prototype.mixinInstanceMethod ).toBe( 'function' );  // orig YUI Test err msg: "mixinInstanceMethod should exist as an instance method by this point"
+							expect( typeof newClass.someStaticMethod ).toBe( 'function' );
+							expect( typeof newClass.someInheritedStaticMethod ).toBe( 'function' );
+							expect( typeof newClass.prototype.mixinInstanceMethod ).toBe( 'function' );
 							expect( this ).toBe( newClass );  // should be called in the scope of the class too
 						},
 						
@@ -924,15 +927,15 @@ describe( "ClassBuilder", function() {
 					}
 				} );
 				
-				expect( onClassCreateCallCount ).toBe( 1 );  // orig YUI Test err msg: "onClassCreate should have been called exactly once at this point"
-				expect( currentClassPassedIn ).toBe( MyClass );  // orig YUI Test err msg: "onClassCreate should have been passed the new class"
+				expect( onClassCreateCallCount ).toBe( 1 );
+				expect( currentClassPassedIn ).toBe( MyClass );
 				
 				
 				// Now create a subclass, without an explicit onClassCreate function. It should be used from the superclass
 				var MySubClass = MyClass.extend( {} );
 				
-				expect( onClassCreateCallCount ).toBe( 2 );  // orig YUI Test err msg: "onClassCreate should have been called exactly twice at this point"
-				expect( currentClassPassedIn ).toBe( MySubClass );  // orig YUI Test err msg: "onClassCreate should have been passed the new subclass"
+				expect( onClassCreateCallCount ).toBe( 2 );
+				expect( currentClassPassedIn ).toBe( MySubClass );
 			} );
 			
 			
@@ -982,7 +985,7 @@ describe( "ClassBuilder", function() {
 		} );
 		
 		
-		describe( 'static extend() method placed on subclass', function() {
+		describe( 'static `extend()` method placed on subclasses', function() {
 			
 			it( "should add a static `extend` method to the subclass, which can be used to extend it", function() {
 				var Superclass = ClassBuilder.build( "Superclass", Object, {

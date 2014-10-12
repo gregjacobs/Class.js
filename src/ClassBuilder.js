@@ -84,7 +84,7 @@ var ClassBuilder = Class.ClassBuilder = {
 		
 		// Finally, add the properties/methods defined in the "overrides" config (which is basically the subclass's 
 		// properties/methods) onto the subclass prototype now.
-		Class.override( subclass, overrides );
+		Class.applyOverrides( subclass, overrides );
 		
 		
 		// -----------------------------------

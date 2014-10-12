@@ -714,6 +714,21 @@ var HelloWorld = Class.create( ... );
 
 ## Changelog:
 
+### 1.0.0
+
+- Initial full release, with `override` and `final` methods.
+
+API breaking changes from 0.x branch:
+
+1. `Class#override` has been renamed to `Class#applyOverrides`
+2. Subclasses must now use `Class#overrideMethod` (or `Class#annotate`) to wrap methods that override superclass methods 
+   of the same name. This is for the long term maintainability of large codebases (trust me, you want this), and emulates 
+   C#'s class system in this way.
+
+### 0.6.0
+
+- Refactoring
+
 ### 0.5.0
 
 * Move distribution files into `dist/` folder.

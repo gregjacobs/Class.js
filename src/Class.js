@@ -78,6 +78,7 @@ var classIdCounter = 0;
  *     dog1.eat();  // "Lassie is eating"
  *     dog2.eat();  // "Bolt is eating"
  *     cat.eat();   // "Leonardo Di Fishy is eating"
+ *    
  */
 var Class = {
 
@@ -148,11 +149,11 @@ var Class = {
 	 * 
 	 * This method adds a few methods to the class that it creates:
 	 * 
-	 * - override : Method that can be used to override members of the class with a passed object literal. 
-	 *   Same as {@link #override}, without the first argument.
-	 * - extend : Method that can be used to directly extend the class. Same as this method, except without
+	 * - `override` : Method that can be used to override members of the class with a passed object literal. 
+	 *   Same as {@link #applyOverrides}, without the first argument.
+	 * - `extend` : Method that can be used to directly extend the class. Same as this method, except without
 	 *   the first argument.
-	 * - hasMixin : Method that can be used to find out if the class (or any of its superclasses) implement a given mixin. 
+	 * - `hasMixin` : Method that can be used to find out if the class (or any of its superclasses) implement a given mixin. 
 	 *   Accepts one argument: the class (constructor function) of the mixin. Note that it is preferable to check if a given 
 	 *   object is an instance of another class or has a mixin by using the {@link #isInstanceOf} method. This hasMixin() 
 	 *   method will just determine if the class has a given mixin, and not if it is an instance of a superclass, or even an 
@@ -247,36 +248,194 @@ var Class = {
 		return ClassBuilder.build( name, superclass, overrides );
 	},
 	
-
+	
 	/**
-	 * Adds a list of functions to the prototype of an existing class, overwriting any existing methods with the same name.
-	 * Usage:
+	 * Annotates a method with metadata which provides different effects within the Class system. The available
+	 * annotations are:
 	 * 
-	 *     Class.override( MyClass, {
-	 *         newMethod1 : function() {
-	 *             // etc.
-	 *         },
-	 *         newMethod2 : function( foo ) {
-	 *             // etc.
-	 *         }
+	 * - `'Override'`: Annotates a method as being an override of a superclass method. For more information, see
+	 *   {@link #overrideMethod}.
+	 * - `'Final'`: Annotates a method as being final. A final method may not be overridden by a subclass. For more
+	 *   information, see {@link #finalMethod}.
+	 *   
+	 * Example calls:
+	 * 
+	 *     Class.extend( Object, {
+	 *     
+	 *         execute : Class.annotate( 'Final', function() {
+	 *             // ...
+	 *         } ),
+	 *         
+	 *         
+	 *         toString : Class.annotate( 'Override', 'Final', function() {
+	 *             return "...";
+	 *         } );
+	 *     
 	 *     } );
-	 * 
-	 * @param {Object} origclass The class to override
-	 * @param {Object} overrides The list of functions to add to origClass.  This should be specified as an object literal
-	 * containing one or more methods.
+	 *   
+	 * @param {...String} annotations One or more annotations to assign to the method.
+	 * @param {Function} method The method to annotate.
 	 */
-	override : function( origclass, overrides ) {
-		if( overrides ) {
-			var proto = origclass.prototype;
-			Util.assign( proto, overrides );
+	annotate : function() {
+		var args = Array.prototype.slice.call( arguments, 0 ),
+		    annotations = args.slice( 0, Math.max( args.length - 1, 0 ) ),  // Math.max() in case no annotations were provided 
+		    method = args[ args.length - 1 ];
+		    
+		// Assign the special annotation properties to the function
+		for( var i = 0, len = annotations.length; i < len; i++ ) {
+			var annotation = annotations[ i ],
+			    lowercaseAnnotation = annotation.toLowerCase();
 			
-			if( Util.isIe() && overrides.hasOwnProperty( 'toString' ) ) {
-				proto.toString = overrides.toString;
+			switch( lowercaseAnnotation ) {
+				case 'override' :
+				case 'final' :
+					method[ '__Class_' + lowercaseAnnotation + 'Method' ] = true;
+					break;
+				
+				default :
+					throw new Error( "Unknown annotation '" + annotation + "'" );
 			}
 		}
+		return method;
+	},
+	
+	
+	/**
+	 * Creates an override method. An override method is one that overrides (redefines) a method from its superclass.
+	 * 
+	 * Class.js requires that all methods which overwrite a superclass method to be declared using `Class.override(method)`.
+	 * There are two reasons for this, both of which contribute to the long term maintenance of large codebases:
+	 * 
+	 * 1) It ensures that adding a method in a superclass won't accidentally be shadowed by a subclass method of the same
+	 *    name, and
+	 * 2) It ensures that methods which are overridden don't accidentally end up being orphaned by the removal of the same 
+	 *    method in the superclass. 
+	 *    
+	 * The second one is important if the subclass author expected that something additional or different happen when the 
+	 * superclass method was called, but now the superclass method is no longer going to be called by implementations.
+	 * 
+	 * ## Example usage:
+	 * 
+	 *     var Car = Class.extend( Object, {
+	 *         
+	 *         constructor : function( model ) {
+	 *             this.model = model;
+	 *         },
+	 *         
+	 *         toString : Class.overrideMethod( function() {
+	 *             return "Car: " + this.model;
+	 *         } )
+	 *         
+	 *     } );
+	 * 
+	 * 
+	 * Note: calling this method is equivalent to calling:
+	 * 
+	 *     Class.annotate( 'Override', function() { ... } );
+	 * 
+	 * @param {Function} method The method to annotate as an "Override" method.
+	 */
+	overrideMethod : function( method ) {
+		return Class.annotate( 'Override', method );
+	},
+	
+	
+	
+	/**
+	 * Creates a "final" method. A final method may not be overridden by subclasses. Doing so would cause an error
+	 * to be thrown.
+	 * 
+	 * Example usage:
+	 * 
+	 *     var Task = Class.create( {
+	 *         
+	 *         constructor : function() {
+	 *             this.deferred = new jQuery.Deferred();
+	 *         },
+	 *         
+	 *         // execute() cannot be overridden by subclasses - they must implement doExecute() instead,
+	 *         // making sure the execute() method interface is always maintained
+	 *         execute : Class.finalMethod( function() {
+	 *             this.doExecute();
+	 *             
+	 *             return this.deferred.promise();
+	 *         } ),
+	 *         
+	 *         doExecute : Class.abstractMethod
+	 *         
+	 *     } );
+	 *     
+	 *     
+	 *     var LoadDataTask = Task.extend( {
+	 *     
+	 *         doExecute : function() {
+	 *             var me = this;
+	 *             
+	 *             jQuery.ajax( { url: '/path/to/data' } ).then(
+	 *                 function( data ) {
+	 *                     data = me.processData( data );
+	 *                     
+	 *                     me.deferred.resolve( data );
+	 *                 },
+	 *                 function() { me.deferred.reject(); }
+	 *             );
+	 *         },
+	 *         
+	 *         
+	 *         processData : function( data ) {
+	 *             // data processing/transformation here
+	 *             return data;
+	 *         }
+	 *     
+	 *     } );
+	 *     
+	 * @param {Function} method The method to annotate as a "Final" method.
+	 */
+	finalMethod : function( method ) {
+		return Class.annotate( 'Final', method );
 	},
 	
 
+	/**
+	 * Adds/overwrites new properties/methods to the prototype of an existing class, overwriting any existing properties/methods 
+	 * with the same name.
+	 * 
+	 * Normally, this method should not be used to decorate classes (you should be subclassing instead). However, for purposes
+	 * of fixing bugs or needing to decorate 3rd party libraries, this method may be used.
+	 * 
+	 * Usage:
+	 * 
+	 *     var MyClass = Class.create( {
+	 *         method1: function() {
+	 *             // ...
+	 *         }
+	 *     } );
+	 * 
+	 * 
+	 *     Class.override( MyClass, {
+	 *         method1 : function() {
+	 *             // new implementation here
+	 *         },
+	 *         newMethod2 : function( foo ) {
+	 *             // ...
+	 *         }
+	 *     } );
+	 * 
+	 * @param {Object} origClass The class to override
+	 * @param {Object} overrides The list of functions to add to origClass.  This should be specified as an object literal
+	 * containing one or more methods.
+	 */
+	applyOverrides : function( origClass, overrides ) {
+		var proto = origClass.prototype;
+		Util.assign( proto, overrides );
+		
+		if( Util.isIe() && overrides.hasOwnProperty( 'toString' ) ) {
+			proto.toString = overrides.toString;
+		}
+		
+		return origClass;
+	},
+	
 
 	/**
 	 * Determines if a given object (`obj`) is an instance of a given class (`jsClass`). This method will
