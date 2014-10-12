@@ -1,6 +1,6 @@
 /*!
  * Class.js
- * Version 0.6.0
+ * Version 0.7.0
  *
  * Copyright(c) 2014 Gregory Jacobs <greg@greg-jacobs.com>
  * MIT Licensed. http://www.opensource.org/licenses/mit-license.php
@@ -444,7 +444,7 @@
 	 * 
 	 * Performs the functionality of building a class. Used from {@link Class#extend}.
 	 */
-	var ClassBuilder = {
+	var ClassBuilder = Class.ClassBuilder = {
 		
 		/**
 		 * Builds a class from the `superclass` and `overrides` for the subclass.
@@ -555,9 +555,10 @@
 			return subclass;
 		},
 		
-		
-		
+			
 		/**
+		 * Creates the constructor function for the new subclass.
+		 * 
 		 * @private
 		 * @param {Function} superclass
 		 * @param {Object} overrides
@@ -577,6 +578,8 @@
 		
 		
 		/**
+		 * Creates the single-inheritance prototype chain from `subclass` to `superclass`.
+		 * 
 		 * @private
 		 * @param {Function} superclass
 		 * @param {Function} subclass
@@ -595,14 +598,19 @@
 		
 		
 		/**
+		 * Checks the `subclass` to make sure that all abstract methods are implemented. This is used to check concrete
+		 * subclasses.
+		 * 
 		 * @private
 		 * @param {Function} subclass
+		 * @throws {Error} If an abstract method is not implemented.
 		 */
 		checkAbstractMethodsImplemented : function( subclass ) {
-			var subclassPrototype = subclass.prototype;
+			var subclassPrototype = subclass.prototype,
+			    abstractMethod = Class.abstractMethod;
 			
 			for( var methodName in subclassPrototype ) {
-				if( subclassPrototype[ methodName ] === Class.abstractMethod ) {  // NOTE: Do *not* filter out prototype properties; we want to test them
+				if( subclassPrototype[ methodName ] === abstractMethod ) {  // NOTE: Do *not* filter out prototype properties; we want to test them
 					var displayName = subclassPrototype.constructor.displayName;
 					if( subclassPrototype.hasOwnProperty( methodName ) ) {
 						throw new Error( "The class " + ( displayName ? "'" + displayName + "'" : "being created" ) + " has abstract method '" + methodName + "', but is not declared with 'abstractClass: true'" );
@@ -615,6 +623,9 @@
 		
 		
 		/**
+		 * Wraps the methods of the new subclass which call `this._super()` in the superclass calling function (which
+		 * implements `this._super()` behind the scenes).
+		 * 
 		 * @private
 		 * @param {Function} superclass
 		 * @param {Object} overrides
@@ -651,17 +662,15 @@
 		
 		
 		/**
+		 * Attaches the Class.js static methods to the `subclass`.
+		 * 
 		 * @private
 		 * @param {Function} subclass
 		 */
 		attachCommonSubclassStatics : function( subclass ) {
-			// Attach new static methods to the subclass
 			subclass.override = function( overrides ) { Class.override( subclass, overrides ); };
 			subclass.extend = function( name, overrides ) {
-				if( arguments.length === 1 ) {
-					overrides = name;
-					name = "";
-				}
+				if( arguments.length === 1 ) { overrides = name; name = ""; }
 				return Class.extend( name, subclass, overrides );
 			};
 			subclass.hasMixin = function( mixin ) { return Class.hasMixin( subclass, mixin ); };
@@ -669,7 +678,7 @@
 		
 		
 		/**
-		 * Attach new instance methods to the subclass
+		 * Attaches the Class.js instance methods to the `subclass`.
 		 * 
 		 * @private
 		 * @param {Function} superclass
@@ -688,8 +697,8 @@
 		 * 
 		 * @private
 		 * @param {Function} superclass
-		 * @param {String} fnName
-		 * @param {Function} fn
+		 * @param {String} fnName The target method name, used to look up in the superclass.
+		 * @param {Function} fn The target method.
 		 */
 		createSuperclassCallingMethod : function( superclass, fnName, fn ) {
 			var superclassPrototype = superclass.prototype;
@@ -715,6 +724,8 @@
 		
 		
 		/**
+		 * Applies the mixin classes' prototype properties to the `subclass`
+		 * 
 		 * @private
 		 * @param {Function} subclass
 		 * @param {Function[]} mixins
@@ -723,13 +734,7 @@
 			var subclassPrototype = subclass.prototype;
 			
 			for( var i = mixins.length-1; i >= 0; i-- ) {
-				var mixinPrototype = mixins[ i ].prototype;
-				for( var prop in mixinPrototype ) {
-					// Do not overwrite properties that already exist on the prototype
-					if( typeof subclassPrototype[ prop ] === 'undefined' ) {
-						subclassPrototype[ prop ] = mixinPrototype[ prop ];
-					}
-				}
+				Util.defaults( subclassPrototype, mixins[ i ].prototype );
 			}
 			
 			// Store which mixin classes the subclass has. This is used in the hasMixin() method
@@ -770,6 +775,25 @@
 					}
 				}
 			}
+			return dest;
+		},
+		
+		
+		/**
+		 * Assigns (shallow copies) the properties of `src` onto `dest`, but only properties
+		 * that don't yet exist on `dest`.
+		 * 
+		 * @param {Object} dest The destination object.
+		 * @param {Object} src The source object.
+		 * @return {Object} The destination object.
+		 */
+		defaults : function( dest, src ) {
+			for( var prop in src ) {
+				if( src.hasOwnProperty( prop ) && !dest.hasOwnProperty( prop ) ) {
+					dest[ prop ] = src[ prop ];
+				}
+			}
+			
 			return dest;
 		},
 		

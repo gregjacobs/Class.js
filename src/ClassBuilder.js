@@ -19,7 +19,7 @@ var inlineOverride = function( obj ) {
  * 
  * Performs the functionality of building a class. Used from {@link Class#extend}.
  */
-var ClassBuilder = {
+var ClassBuilder = Class.ClassBuilder = {
 	
 	/**
 	 * Builds a class from the `superclass` and `overrides` for the subclass.
