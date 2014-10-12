@@ -36,6 +36,25 @@ var Util = Class.Util = {
 	
 	
 	/**
+	 * Assigns (shallow copies) the properties of `src` onto `dest`, but only properties
+	 * that don't yet exist on `dest`.
+	 * 
+	 * @param {Object} dest The destination object.
+	 * @param {Object} src The source object.
+	 * @return {Object} The destination object.
+	 */
+	defaults : function( dest, src ) {
+		for( var prop in src ) {
+			if( src.hasOwnProperty( prop ) && !dest.hasOwnProperty( prop ) ) {
+				dest[ prop ] = src[ prop ];
+			}
+		}
+		
+		return dest;
+	},
+	
+	
+	/**
 	 * Determines if a value is an object.
 	 * 
 	 * @param {Mixed} value
