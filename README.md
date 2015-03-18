@@ -1,17 +1,17 @@
 # Class.js
 
-Add some class(es) to your JavaScript! 
+Add class(es) to your JavaScript! 
 
-After all, if you're not using OOP, then you're doing it wrong ;) Granted, JavaScript doesn't make it easy or straightforward to implement classical inheritance in the language, so that's what this is for. This small utility allows you to:
+JavaScript doesn't make it easy or straightforward to implement classical inheritance in the language, so that's what this utility is for. Using this utility, and OOP in general, allows you to more easily write reusable, extensible, maintainable, and testable code, which is fundamental for writing and maintaining large software systems.
+
+This small utility allows you to:
 
 - Create classes in JavaScript (where JavaScript doesn't actually have a formal notion of a "class"), easily setting up instance properties / methods.
-- Singly-inherit from other classes (just like Java, C#, or any other OOP language does), and easily call superclass constructors/methods from overridden constructors/methods in subclasses
-- Declare abstract classes / methods
+- Singly-inherit from other classes (just like Java, C#, or most other OOP languages do), and easily call superclass constructors/methods from overridden methods in subclasses.
+- Declare abstract classes / methods.
 - Add mixin classes as a form of multiple inheritance, or the ability to implement interfaces.
 - Add static methods which are optionally inherited by subclasses.
 - Add a special static method (onClassCreated) which allows for the static initialization of the class itself (much like a static initializer does in Java).
-
-Using this utility, and OOP in general, allows you to more easily write reusable, extensible, maintainable, and testable code.
 
 
 ## Creating and Extending a Class
