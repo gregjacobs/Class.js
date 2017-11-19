@@ -1,3 +1,10 @@
+# Deprecated
+
+This project is essentially deprecated in favor of ES6 classes. I recommend using
+[Babel](https://babeljs.io/) for pure JS, or [TypeScript](https://www.typescriptlang.org/) 
+to create to create classes from now on.
+
+
 # Class.js
 
 Add class(es) to your JavaScript! 
