@@ -1,8 +1,8 @@
 # \*\*Deprecated\*\*
 
-This project is deprecated in favor of ES6 (i.e. ES2015) classes, and only really applied to ECMAScript 5 and below (where prototype chaining was the only option).
+This project is deprecated in favor of ES6 (i.e. ES2015) [classes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes), and only really applied to ECMAScript 5 and below (where prototype chaining was the only option).
 
-All current browsers as of June 15, 2022 (with the demise of Internet Explorer) now support [ECMAScript classes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes) directly, but if needing classes for older environments, write them as ES6 classes and use [Babel](https://babeljs.io/) or the [TypeScript](https://www.typescriptlang.org/) compiler to transpile them down.
+All current browsers as of June 15, 2022 (with the demise of Internet Explorer) now support ECMAScript classes directly, but if needing classes for older environments, write them as ES6 classes and use [Babel](https://babeljs.io/) or the [TypeScript](https://www.typescriptlang.org/) compiler to transpile them down.
 
 
 # Class.js
